@@ -200,21 +200,59 @@ for jwh, hd in honor_data.items():
 users_list.sort(key=lambda u: u["growthPoints"], reverse=True)
 
 
-# 生成排名（含 id 字段，供前端使用）
-def to_rank(users, limit=100):
+# ===== 第四步：计算本周/本月/累计排名 =====
+from datetime import datetime, timedelta
+
+now = datetime.now()
+today = now.date()
+
+# 本周：周一到周五
+monday = today - timedelta(days=today.weekday())
+friday = monday + timedelta(days=4)
+week_start = monday.strftime("%Y-%m-%d")
+week_end = friday.strftime("%Y-%m-%d")
+
+# 本月：当月第一天到今天（6月特殊从24号开始）
+if today.month == 6:
+    month_start = "2026-06-24"
+else:
+    month_start = today.replace(day=1).strftime("%Y-%m-%d")
+month_end = today.strftime("%Y-%m-%d")
+
+
+def sum_points_in_range(users, start_date, end_date):
+    """按 records 中 date 在 [start_date, end_date] 范围内的 points 求和"""
+    user_points = {}
+    for u in users:
+        pts = sum(
+            r["points"]
+            for r in u.get("records", [])
+            if start_date <= r["date"] <= end_date
+        )
+        if pts > 0:
+            user_points[u["id"]] = {
+                "nickname": u["nickname"],
+                "id": u["id"],
+                "points": pts,
+            }
+    return sorted(user_points.values(), key=lambda x: x["points"], reverse=True)
+
+
+def to_cumulative_rank(users, limit=100):
+    """累计排名按 growthPoints 排序"""
     return [
         {"nickname": u["nickname"], "id": u["id"], "points": u["growthPoints"]}
         for u in users
-        if u["id"] != "30017755"
+        if u["id"] != "30017755" and u["growthPoints"] > 0
     ][:limit]
 
 
 data_json = {
-    "lastUpdated": "2026-07-07",
+    "lastUpdated": today.strftime("%Y-%m-%d"),
     "users": users_list,
-    "weeklyRanking": to_rank(users_list),
-    "monthlyRanking": to_rank(users_list),
-    "cumulativeRanking": to_rank(users_list),
+    "weeklyRanking": sum_points_in_range(users_list, week_start, week_end),
+    "monthlyRanking": sum_points_in_range(users_list, month_start, month_end),
+    "cumulativeRanking": to_cumulative_rank(users_list),
     "announcements": [
         "2026年6月24日：精网新秀成长活动正式启动！6月24日积分翻3倍！"
     ],
