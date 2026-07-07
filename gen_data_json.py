@@ -173,6 +173,31 @@ for (source_label, _), source_dir in SOURCES.items():
                     }
                 )
 
+# ===== 合并同日期同动作类型的 records（跨数据源去重） =====
+def get_action_type(source):
+    if '签到' in source: return '签到'
+    if '观看' in source: return '观看'
+    if '互动' in source: return '互动'
+    return source
+
+for jwh, ur in user_records.items():
+    merged = {}
+    for r in ur["records"]:
+        key = (r["date"], get_action_type(r["source"]))
+        if key not in merged:
+            merged[key] = {"date": r["date"], "points": 0, "sources": []}
+        merged[key]["points"] += r["points"]
+        # 提取主来源名（如"财经壹眼签到"→"财经壹眼"）
+        src_name = r["source"].replace("签到","").replace("观看≥20分钟","").replace("课堂互动","")
+        if src_name not in merged[key]["sources"]:
+            merged[key]["sources"].append(src_name)
+    # 重建 records：用"/"连接多源
+    new_records = []
+    for (date, action), m in sorted(merged.items()):
+        combined_source = "/".join(m["sources"]) + action
+        new_records.append({"date": date, "source": combined_source, "points": m["points"]})
+    ur["records"] = new_records
+
 print(f"Users with records: {len(user_records)}")
 
 # ===== 第二步：读取 honor_data.json 获取成长值 =====
