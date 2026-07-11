@@ -232,9 +232,8 @@ with open(
 users_list = []
 for jwh, hd in honor_data.items():
     ur = user_records.get(jwh, {"name": hd.get("name", ""), "records": []})
-    total_growth = hd.get("growth_points", 0)
-    # 使用 honor_data 的成长值（已由 calc_honors.py 正确计算）
-    # 不再用 records 总和覆盖
+    total_growth = sum(r["points"] for r in ur["records"])
+    # 用 records 总和计算 growthPoints，与排名逻辑保持一致
     users_list.append({
         "id": jwh,
         "nickname": hd.get("name", ur.get("name", "")),
@@ -285,13 +284,14 @@ def sum_points_in_range(users, start_date, end_date):
     return sorted(user_points.values(), key=lambda x: x["points"], reverse=True)
 
 
-def to_cumulative_rank(users, limit=100):
-    """累计排名按 growthPoints 排序"""
-    return [
+def to_cumulative_rank(users, limit=None):
+    """累计排名按 growthPoints 排序，limit=None 返回全部"""
+    result = [
         {"nickname": u["nickname"], "id": u["id"], "points": u["growthPoints"]}
         for u in users
         if u["id"] != "30017755" and u["growthPoints"] > 0
-    ][:limit]
+    ]
+    return result[:limit] if limit else result
 
 
 data_json = {
