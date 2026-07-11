@@ -173,6 +173,53 @@ for (source_label, _), source_dir in SOURCES.items():
                     }
                 )
 
+# ===== 易学久会投教/精网同栏目去重 =====
+def get_yxjh_action(source):
+    if '签到' in source: return '签到'
+    if '观看' in source: return '观看'
+    if '互动' in source: return '互动'
+    return None
+
+for jwh, ur in user_records.items():
+    # 分离易学久会记录和非易学久会记录
+    yxjh_records = []
+    other_records = []
+    for r in ur["records"]:
+        if '易学久会' in r['source']:
+            yxjh_records.append(r)
+        else:
+            other_records.append(r)
+
+    if not yxjh_records:
+        continue
+
+    # 按 (date, action) 去重，同日期同动作只保留一条（取 points 非零值）
+    merged = {}
+    for r in yxjh_records:
+        action = get_yxjh_action(r['source'])
+        if not action:
+            other_records.append(r)
+            continue
+        key = (r['date'], action)
+        if key not in merged:
+            merged[key] = r['points']
+        else:
+            merged[key] = max(merged[key], r['points'])  # 取较大值，不累加
+
+    # 重建易学久会记录
+    new_yxjh = []
+    for (date, action), pts in sorted(merged.items()):
+        action_label = {'签到': '签到', '观看': '观看≥20分钟', '互动': '课堂互动'}[action]
+        new_yxjh.append({
+            "date": date,
+            "source": f"易学久会{action_label}",
+            "points": pts
+        })
+
+    ur["records"] = other_records + new_yxjh
+    # 按日期排序
+    ur["records"].sort(key=lambda r: r['date'])
+
 print(f"Users with records: {len(user_records)}")
 
 # ===== 第二步：读取 honor_data.json 获取成长值 =====
