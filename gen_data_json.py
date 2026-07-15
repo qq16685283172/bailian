@@ -4,7 +4,7 @@ from collections import defaultdict
 # ===== 数据源（同 calc_honors.py） =====
 BASE = r"C:\Users\松元涛\Desktop\总文件夹\数据统计\视频数据"
 SOURCES = {
-    ("财经易眼", "cjyy"): os.path.join(BASE, "财经易眼"),
+    ("财经壹眼", "cjyy"): os.path.join(BASE, "财经壹眼"),
     ("易学久会_投教", "yxjh"): os.path.join(BASE, "易学久会", "投教"),
     ("易学久会_精网", "yxjh"): os.path.join(BASE, "易学久会", "精网"),
 }
