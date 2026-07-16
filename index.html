@@ -742,6 +742,16 @@ card.innerHTML='<div class="rc-icon '+st+'">'+l.icon+'</div><div class="rc-body"
 if(isClaimed)cc.appendChild(card);else if(isUnlocked)uc.appendChild(card);else lc.appendChild(card);
 }
 });
+var aid="anniversary_delta";var aClaimed=ca.indexOf(aid)!==-1;var aUnlocked=gp>=1;
+var acard=document.createElement("div");acard.className="rewardCard";
+var ast,abc,abt,abd=false;
+if(aClaimed){ast="claimed";abc="claimed";abt="已领取";abd=true;hc=true;}
+else if(aUnlocked){ast="unclaimed";abc="unclaimed";abt="领取奖励";hu=true;}
+else{ast="locked";abc="locked";abt="未解锁";abd=true;hl=true;}
+var abtn='<button class="rc-btn '+abc+'"'+(abd?" disabled":"")+' onclick="claimReward(\''+aid+'\')">'+abt+'</button>';
+if(aClaimed&&REWARD_FILES[aid]){abtn='<a class="rc-btn download-btn" href="'+REWARD_FILES[aid]+'" download style="text-decoration:none;display:inline-block;text-align:center;line-height:36px;">下载资料</a>';}
+acard.innerHTML='<div class="rc-icon '+ast+'">🎂</div><div class="rc-body"><div class="rc-name">周年庆专属《DELTA三角洲理论》</div><div class="rc-condition">积分≥1 即可解锁</div></div>'+abtn;
+if(aClaimed)cc.appendChild(acard);else if(aUnlocked)uc.appendChild(acard);else lc.appendChild(acard);
 if(!hu)uc.innerHTML='<div style="padding:16px;text-align:center;color:var(--text-lighter);font-size:13px;">暂无待领取的奖励</div>';
 if(!hc)cc.innerHTML='<div style="padding:16px;text-align:center;color:var(--text-lighter);font-size:13px;">暂无已领取的奖励</div>';
 if(!hl)lc.innerHTML='<div style="padding:16px;text-align:center;color:var(--text-lighter);font-size:13px;">所有奖励均已解锁</div>';}
@@ -768,7 +778,7 @@ var topData=data.slice(0,20);if(topData.length===0){list.innerHTML='<div class="
 topData.forEach(function(entry,i){var d=document.createElement("div");d.className="lbEntry";var rc="",icon;if(i===0){rc="gold";icon="🥇"}else if(i===1){rc="silver";icon="🥈"}else if(i===2){rc="bronze";icon="🥉"}else{icon="#"+(i+1)}
 var displayName=maskDisplay(entry,entry.id===currentUser.id);
 d.innerHTML='<span class="lb-rank '+rc+'">'+icon+'</span><span class="lb-name">'+displayName+'</span><span class="lb-points">'+entry.points+'</span>';list.appendChild(d)})}
-var REWARD_FILES={"lv5":"rewards/%E9%80%83%E9%A1%B6%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C.pdf","lv6":"rewards/%E9%A2%86%E8%88%AA%E8%BF%9B%E9%98%B6%E5%AE%9D%E5%85%B8.pdf","lv7":"rewards/%E9%A1%B6%E7%BA%A7%E6%B8%B8%E8%B5%84%E6%B6%A8%E5%81%9C%E5%AE%9D%E5%85%B8.pdf"};function claimReward(id){if(!currentUser.claimedRewards)currentUser.claimedRewards=[];if(currentUser.claimedRewards.indexOf(id)!==-1){showSnackbar("该奖励已领取过了");return}
+var REWARD_FILES={"lv5":"rewards/%E9%80%83%E9%A1%B6%E5%AE%9E%E6%88%98%E6%89%8B%E5%86%8C.pdf","lv6":"rewards/%E9%A2%86%E8%88%AA%E8%BF%9B%E9%98%B6%E5%AE%9D%E5%85%B8.pdf","lv7":"rewards/%E9%A1%B6%E7%BA%A7%E6%B8%B8%E8%B5%84%E6%B6%A8%E5%81%9C%E5%AE%9D%E5%85%B8.pdf","anniversary_delta":"rewards/DELTA%E4%B8%89%E8%A7%92%E6%B4%B2%E7%90%86%E8%AE%BA.pdf"};function claimReward(id){if(!currentUser.claimedRewards)currentUser.claimedRewards=[];if(currentUser.claimedRewards.indexOf(id)!==-1){showSnackbar("该奖励已领取过了");return}
 currentUser.claimedRewards.push(id);renderRewards();showSnackbar("🎉 恭喜领取奖励成功！");if(REWARD_FILES[id]){var a=document.createElement("a");a.href=REWARD_FILES[id];a.download=REWARD_FILES[id].split("/").pop();document.body.appendChild(a);a.click();document.body.removeChild(a)}}
 function showSnackbar(msg){var sb=document.getElementById("snackbar");sb.textContent=msg;sb.style.display="block";setTimeout(function(){sb.style.display="none"},2500)}
 var currentPage="pageHome";
