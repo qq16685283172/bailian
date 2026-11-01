@@ -1,0 +1,199 @@
+/* 中老年友好：更大字号、更宽点击区、更清晰的层级；含移动端比例修正 */
+
+/* 进度环：数字与圆环同心，0/6 不再错位 */
+.progress-ring{display:flex;align-items:center;justify-content:center}
+.progress-ring>strong{position:relative;z-index:1;display:inline-flex;align-items:baseline;justify-content:center;gap:1px;line-height:1;white-space:nowrap}
+.progress-ring>strong span{display:inline-block;line-height:1}
+
+/* 全局阅读性 */
+body{font-size:15px}
+.topbar h1{font-size:22px}
+.topbar p{font-size:12px}
+.sidebar nav button{font-size:15px}
+.panel-heading h2{font-size:17px}
+.panel-heading p{font-size:12px}
+.hero-copy>p{font-size:13px}
+.hero h1{font-size:34px}
+.hero-score strong{font-size:58px}
+.hero-score span{font-size:13px}
+.hero-score .progress-ring{width:82px;height:82px}
+.hero-score .progress-ring>strong{font-size:23px}
+.hero-score .progress-ring>strong span{font-size:12px}
+.hero-mascot strong{font-size:18px}
+.hero-mascot span{font-size:12px}
+.rank-cards span{font-size:12px}
+.rank-cards strong{font-size:31px}
+.rank-cards small{font-size:11px}
+.channel-name{font-size:15px}
+.live-status{font-size:12px}
+.channel-info p{font-size:12px}
+.task-action{min-height:52px}
+.task-action strong{font-size:14px}
+.task-action small{font-size:12px}
+.channel-score strong{font-size:20px}
+.channel-score span{font-size:12px}
+.level-widget .level-badge strong{font-size:23px}
+.level-widget .level-badge span{font-size:13px}
+.level-widget .level-badge small{font-size:12px}
+.level-progress span{font-size:12px}
+.next-reward h3{font-size:19px}
+.next-reward p{font-size:13px}
+.next-reward>span{font-size:12px}
+.btn{font-size:14px;min-height:42px}
+.text-link{font-size:13px}
+.summary-banner h2{font-size:24px}
+.summary-banner p{font-size:13px}
+.task-summary-grid span{font-size:13px}
+.task-summary-grid strong{font-size:30px}
+.ledger-row strong{font-size:14px}
+.ledger-row small{font-size:12px}
+.ledger-row b{font-size:16px}
+.footer{font-size:12px}
+.ai-msg{font-size:14px}
+.ai-input input{height:42px;font-size:14px}
+.ai-chips button{font-size:13px}
+
+/* 排行榜：前 10 名 + 本人，放大字号与行高 */
+.rank-table{width:100%;border-collapse:collapse}
+.rank-table th{padding:14px 12px;font-size:13px;font-weight:600;color:#8c857d;text-align:left;border-bottom:1px solid #ece7df}
+.rank-table td{padding:16px 12px;font-size:16px;vertical-align:middle;border-bottom:1px solid #f2ede6}
+.rank-table tbody tr:last-child td{border-bottom:0}
+.rank-table td:first-child strong,.rank-table td:last-child strong{font-size:19px;color:#98262c}
+.rank-table .rank-me td{background:#fdf6ea;font-weight:600}
+.rank-table .rank-me td:first-child{border-left:3px solid #c6974d}
+
+@media(max-width:760px){
+  .topbar h1{font-size:19px}
+  .topbar p{display:none}
+  .hero{min-height:0;padding:20px 18px 0}
+  .hero h1{font-size:23px}
+  .hero-copy{max-width:100%}
+  .hero-copy>p{font-size:12px}
+  .hero-score{gap:20px;margin-top:14px;padding-bottom:22px}
+  .hero-score strong{font-size:46px}
+  .hero-score .progress-ring{width:64px;height:64px}
+  .hero-score .progress-ring>strong{font-size:19px}
+  .hero-score .progress-ring>strong span{font-size:11px}
+
+  /* 任务卡片：频道一行，任务整行大按钮 */
+  .channel-row,.expanded .channel-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:16px 0}
+  .channel-info{flex:1 1 60%;min-width:0}
+  .channel-score{margin-left:auto;text-align:right}
+  .task-actions{flex:1 1 100%;display:grid;grid-template-columns:1fr;gap:8px}
+  .task-action,.expanded .task-action{min-height:50px;padding:10px 12px;justify-content:flex-start}
+  .task-action strong{font-size:15px}
+  .task-action small{font-size:12px}
+  .task-action .task-check{display:grid}
+
+  .summary-banner{flex-direction:column;align-items:flex-start;gap:12px;padding:20px}
+  .summary-banner h2{font-size:20px}
+  .task-summary-grid{grid-template-columns:1fr 1fr;gap:12px}
+  .task-summary-grid strong{font-size:26px}
+  .rank-cards strong{font-size:27px}
+
+  /* 排行榜：手机上隐藏分部列，保留名次/学员/等级/积分 */
+  .table-scroll .rank-table{min-width:0;table-layout:fixed}
+  .rank-table th{padding:12px 8px;font-size:12px}
+  .rank-table td{padding:13px 8px;font-size:15px}
+  .rank-table th:nth-child(4),.rank-table td:nth-child(4){display:none}
+  .rank-table td:first-child strong,.rank-table td:last-child strong{font-size:17px}
+  .tabs button{min-height:40px;padding:8px 14px;font-size:14px}
+  .real-data-note{flex-wrap:wrap;gap:12px}
+  .ranking-hero h2{font-size:20px}
+  .footer{flex-wrap:wrap;font-size:11px}
+}
+
+/* 首页累计积分与奖励装扮 */
+.hero-total-score{padding-left:26px;border-left:1px solid rgba(255,225,183,.24)}
+.rank-bubble{position:relative;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:12px;isolation:isolate}
+.rank-bubble.rank-bubble-gold{background:linear-gradient(145deg,#fff4c8,#d7a64c);border:1px solid #c28e35;box-shadow:0 4px 12px rgba(184,130,42,.24)}
+.rank-bubble.rank-bubble-red{background:linear-gradient(145deg,#c44b45,#7f1c23);border:1px solid #d6a458;box-shadow:0 5px 14px rgba(127,28,35,.28)}
+.rank-bubble.rank-bubble-gold strong{color:#742027}
+.rank-bubble.rank-bubble-red strong{color:#ffe4ad}
+.profile-avatar.avatar-frame-quench{border:4px solid #e3b55e;box-shadow:0 0 0 3px #fff4d5,0 8px 22px rgba(175,119,35,.28)}
+.profile-avatar.avatar-frame-master{border:4px solid #f0ce82;box-shadow:0 0 0 3px #8b1c22,0 0 24px rgba(198,151,77,.48)}
+.reward-filter-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.reward-filter-row>span{font-size:13px;color:#8c857d}
+.reward-kind-tabs button{min-width:96px}
+.reward-banner p strong{font-size:20px;color:#ffe0a6}
+.reward-info h3{font-size:19px;line-height:1.45}
+.reward-info p{font-size:14px;line-height:1.75}
+.reward-info small{font-size:12px;line-height:1.7}
+.points-threshold{font-size:13px}
+.claimed-detail{display:flex;flex-direction:column;gap:5px;margin-top:14px;padding:12px;border-radius:9px;background:#f4f7ef;color:#5d714e}
+.claimed-detail strong{font-size:14px}
+.claimed-detail span{font-size:12px}
+.cosmetic-preview{position:relative;display:grid;place-items:center;width:82px;height:82px;border-radius:50%;background:linear-gradient(145deg,#a7353a,#721920);color:#ffe0a6;font-size:29px;font-weight:700}
+.cosmetic-preview small{position:absolute;bottom:-23px;font-size:12px;font-weight:500;color:#8c714d;white-space:nowrap}
+.avatar-preview.avatar-frame-quench{border:5px solid #dcae54;box-shadow:0 0 0 3px #fff7df,0 9px 22px rgba(170,111,29,.25)}
+.avatar-preview.avatar-frame-master{border:5px solid #f0ce82;box-shadow:0 0 0 4px #8b1c22,0 0 25px rgba(198,151,77,.42)}
+.bubble-preview{display:flex;flex-direction:column;align-items:center;gap:6px;color:#8c714d}
+.bubble-preview>span,.bubble-preview>small{font-size:12px}
+.bubble-preview .rank-bubble{width:54px;height:54px;border-radius:17px}
+.bubble-preview .rank-bubble strong{font-size:24px}
+.modal>.cosmetic-preview{margin:4px auto 30px}
+.modal>.bubble-preview{margin:4px auto 20px}
+@media(max-width:760px){
+  .hero-score{gap:14px}
+  .hero-score strong{font-size:40px}
+  .hero-total-score{padding-left:14px}
+  .hero-score .progress-ring{flex-shrink:0}
+  .reward-filter-row{align-items:flex-start;flex-direction:column;gap:8px}
+  .reward-filter-row>span{font-size:12px}
+  .reward-kind-tabs{width:100%}
+  .reward-kind-tabs button{flex:1;min-width:0;padding:8px}
+  .rank-bubble{width:32px;height:32px;border-radius:10px}
+}
+.material-preview{display:flex;flex-direction:column;align-items:center;justify-content:center;width:82px;height:96px;border:1px solid #e5d5c0;border-radius:12px;background:linear-gradient(145deg,#fff,#f6ead8);color:#9a3439;box-shadow:0 7px 16px rgba(103,61,31,.1)}
+.material-preview svg{width:32px;height:32px}
+.material-preview strong{margin-top:3px;font-size:17px;letter-spacing:1px}
+.material-preview small{margin-top:3px;color:#927e68;font-size:11px}
+.material-download{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;text-decoration:none}
+.material-download svg{width:16px;height:16px}
+
+/* 奖励区域紧凑化：保留易读字号与足够大的操作按钮 */
+.rewards-page{animation:none}
+.rewards-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.rewards-page .reward-card{border-radius:13px}
+.rewards-page .reward-card-top{height:108px}
+.rewards-page .reward-info{padding:14px}
+.rewards-page .reward-info h3{margin:6px 0 5px;font-size:17px;line-height:1.45}
+.rewards-page .reward-info p{display:-webkit-box;min-height:42px;margin:6px 0;overflow:hidden;font-size:13px;line-height:1.65;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rewards-page .reward-info small{font-size:11px;line-height:1.55}
+.rewards-page .points-threshold{font-size:12px}
+.rewards-page .reward-info .btn{min-height:42px;margin-top:12px;font-size:14px}
+.rewards-page .claimed-detail{gap:3px;margin-top:10px;padding:10px}
+.rewards-page .claimed-detail strong{font-size:13px}
+.rewards-page .claimed-detail span{font-size:11px}
+.rewards-page .reward-card-top .cosmetic-preview{width:58px;height:58px;font-size:21px}
+.rewards-page .reward-card-top .cosmetic-preview small{bottom:-18px;font-size:10px}
+.rewards-page .reward-card-top .avatar-preview[class*='avatar-frame']::before,.rewards-page .reward-card-top .avatar-preview[class*='avatar-frame']::after{top:12px;width:25px;height:34px}
+.rewards-page .reward-card-top .avatar-preview[class*='avatar-frame']::before{left:-21px}
+.rewards-page .reward-card-top .avatar-preview[class*='avatar-frame']::after{right:-21px}
+.rewards-page .reward-card-top .bubble-preview{gap:3px}
+.rewards-page .reward-card-top .bubble-preview .rank-bubble{width:42px;height:42px;border-radius:13px}
+.rewards-page .reward-card-top .bubble-preview .rank-bubble strong{font-size:19px}
+.rewards-page .reward-card-top .theme-preview{width:120px;height:74px;padding:8px 10px}
+.rewards-page .reward-card-top .theme-preview b{font-size:16px}
+.rewards-page .reward-card-top .material-preview{width:58px;height:68px;border-radius:9px}
+.rewards-page .reward-card-top .material-preview svg{width:24px;height:24px}
+.rewards-page .reward-card-top .material-preview strong{font-size:14px}
+.rewards-page .reward-card-top .material-preview small{font-size:10px}
+.rewards-page .modal{width:360px;padding:22px;border-radius:14px}
+.rewards-page .modal h2{margin:8px 0;font-size:20px}
+.rewards-page .modal p{font-size:15px;line-height:1.65}
+.rewards-page .modal-close{top:12px;right:12px;width:36px;height:36px}
+.rewards-page .modal-close svg{width:20px;height:20px}
+.rewards-page .modal-tip{padding:10px 12px;font-size:14px;line-height:1.65}
+.rewards-page .modal .btn{min-height:44px;font-size:16px}
+.rewards-page .modal-actions{gap:10px;margin-top:16px}
+.rewards-page .modal>.cosmetic-preview{width:64px;height:64px;margin:3px auto 25px;font-size:23px}
+.rewards-page .modal>.bubble-preview{margin:2px auto 14px}
+.rewards-page .modal .success-burst{width:48px;height:48px;margin:0 auto 10px}
+.rewards-page .modal>.material-download{width:100%;margin:14px 0 10px}
+@media(max-width:760px){
+  .rewards-grid{grid-template-columns:1fr;gap:12px}
+  .rewards-page .reward-card-top{height:96px}
+  .rewards-page .reward-info p{min-height:0}
+  .rewards-page .modal{width:calc(100vw - 32px);padding:20px}
+}

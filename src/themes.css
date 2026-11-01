@@ -1,0 +1,65 @@
+/* 可爱云朵主题 */
+.app.theme-cute{--red:#bf5b7d;--deep:#93415f;--gold:#dc9b63;--line:#f0dce4;--muted:#9c7e8c;background:#fff8fb;color:#4d3641}
+.theme-cute .sidebar{background:linear-gradient(175deg,#c96f91,#9f4f70)}
+.theme-cute .topbar{background:#fff8fb;border-bottom-color:#f1dce5}
+.theme-cute .hero,.theme-cute .ranking-hero,.theme-cute .summary-banner,.theme-cute .reward-banner{background:linear-gradient(120deg,#c5688a,#e59ab2 60%,#e8b982)}
+.theme-cute .hero canvas{filter:hue-rotate(295deg) saturate(.65) brightness(1.18)}
+.theme-cute .panel{border-color:#f0dce4;border-radius:18px;box-shadow:0 8px 25px rgba(160,90,120,.055)}
+.theme-cute .rank-cards>div,.theme-cute .level-widget .level-badge{background:linear-gradient(145deg,#fff2f7,#ffe7ef);border-color:#f1cfdd}
+.theme-cute .rank-cards strong,.theme-cute .task-summary-grid strong{color:#ae4f73}
+.theme-cute .level-widget .level-badge strong{color:#9f4668}
+.theme-cute .btn-primary,.theme-cute .ai-fab,.theme-cute .ai-input button{background:linear-gradient(135deg,#c66789,#a44d6e)}
+.theme-cute .task-action{border-color:#efdce4;background:#fff9fb}
+.theme-cute .task-action.done{background:#f1f8ed;border-color:#d9e8ce}
+.theme-cute .mobile-bottom-nav button.active,.theme-cute .tabs button.active{color:#b55477}
+.theme-cute .tabs button.active{background:#ffedf4}
+.theme-cute .ai-head{background:linear-gradient(135deg,#c66789,#9c4869)}
+.theme-cute .ai-msg.me{background:linear-gradient(135deg,#c66789,#a44d6e)}
+
+/* 星环科技主题 */
+.app.theme-tech{--red:#1d91b5;--deep:#123a56;--gold:#55d9f5;--line:#1c3b50;--muted:#82a4b8;background:#07111e;color:#dceef7}
+.theme-tech .main,.theme-tech .topbar{background:#07111e;color:#dceef7}
+.theme-tech .topbar{border-bottom-color:#17364b}
+.theme-tech .topbar p,.theme-tech .top-date,.theme-tech .footer{color:#7899ad}
+.theme-tech .content{background:radial-gradient(circle at 80% 0,rgba(19,111,145,.11),transparent 35%)}
+.theme-tech .sidebar{background:linear-gradient(175deg,#102b43,#071522);box-shadow:5px 0 30px rgba(0,0,0,.25)}
+.theme-tech .hero,.theme-tech .ranking-hero,.theme-tech .summary-banner,.theme-tech .reward-banner{background:linear-gradient(120deg,#0d2940,#105476 62%,#12344e);border-color:#1c6b88}
+.theme-tech .hero canvas{filter:hue-rotate(205deg) saturate(.9) brightness(.85)}
+.theme-tech .panel{border-color:#1a374b;background:#0e1d2c;color:#dceef7;box-shadow:0 10px 28px rgba(0,0,0,.16)}
+.theme-tech .panel-heading p,.theme-tech .channel-info p,.theme-tech .next-reward p,.theme-tech .next-reward>span,.theme-tech .ledger-row small,.theme-tech .level-progress span,.theme-tech .reward-info p,.theme-tech .reward-info small,.theme-tech .wardrobe-item-info p{color:#89a7b9}
+.theme-tech .next-reward h3,.theme-tech .reward-info h3,.theme-tech .ranking-hero h2{color:#e4f6ff}
+.theme-tech .rank-cards>div{background:linear-gradient(145deg,#10283b,#0b1d2d);border-color:#1b465d}
+.theme-tech .rank-cards strong,.theme-tech .task-summary-grid strong,.theme-tech .channel-score strong{color:#60ddf7}
+.theme-tech .level-widget .level-badge{background:linear-gradient(140deg,#123d5b,#11627b 58%,#17364e);box-shadow:0 14px 30px -18px rgba(54,209,240,.4)}
+.theme-tech .btn-primary,.theme-tech .ai-fab,.theme-tech .ai-input button{background:linear-gradient(135deg,#147b9e,#104c6c);border-color:#238eae}
+.theme-tech .btn-outline{border-color:#285068;background:#102235;color:#a8d9e8}
+.theme-tech .task-action{border-color:#1c3b4f;background:#0b1927;color:#b6cedb}
+.theme-tech .task-action.done{background:#102c2c;border-color:#1f4d4a;color:#82c7ae}
+.theme-tech .rank-table th{color:#85a9bd;border-bottom-color:#1c3b50}
+.theme-tech .rank-table td{border-bottom-color:#173144}
+.theme-tech .rank-table .rank-me td{background:#102b3a}
+.theme-tech .rank-table td:first-child strong,.theme-tech .rank-table td:last-child strong{color:#61def6}
+.theme-tech .tabs button{color:#8cabc0}
+.theme-tech .tabs button.active{background:#123349;color:#66def4}
+.app.theme-tech .mobile-bottom-nav{border-color:#17394f;background:rgba(7,20,32,.98)}
+.theme-tech .panel-heading>svg,.theme-tech .panel-heading>span{color:#62dff5}
+.theme-tech .mobile-bottom-nav button{color:#7899ad}
+.theme-tech .mobile-bottom-nav button.active{color:#62dff5}
+.theme-tech .wardrobe-hero{background:linear-gradient(120deg,#102b3f,#0c1b2b);border-color:#1b4a61}
+.theme-tech .wardrobe-hero h2{color:#8cecff}
+.theme-tech .wardrobe-hero p,.theme-tech .wardrobe-section .panel-heading>span{color:#83a5b9}
+.theme-tech .wardrobe-item{background:#0e1d2c;border-color:#1b3b50}
+.theme-tech .wardrobe-item.active{border-color:#3bc3e3}
+.theme-tech .wardrobe-visual{background:linear-gradient(145deg,#102639,#0a1724)}
+.theme-tech .reward-card-top{background:linear-gradient(145deg,#122c3f,#0d1e2e)}
+.theme-tech .claimed-detail{background:#102b2c;color:#85c9b0}
+.theme-tech .real-data-note,.theme-tech .profile-name p,.theme-tech .profile-name small{color:#83a5b9}
+.theme-tech .modal{background:#0e1d2c;color:#e0f1f8;border-color:#23485e}
+.theme-tech .ai-panel{background:#0e1d2c;border-color:#1d4358}
+.theme-tech .ai-head{background:linear-gradient(135deg,#125372,#0a2a40)}
+.theme-tech .ai-topic-bar,.theme-tech .ai-input,.theme-tech .ai-foot{background:#0b1a28;border-color:#1c3b50;color:#7fa9bc}
+.theme-tech .ai-body{background:#081522}
+.theme-tech .ai-msg.ai{background:#102233;border-color:#1d4055;color:#d5eaf4}
+.theme-tech .ai-msg.me{background:linear-gradient(135deg,#147b9e,#104c6c)}
+.theme-tech .ai-panel .ai-chips button{background:#102233;border-color:#1d4055;color:#9cc9d9}
+.theme-tech .ai-panel .ai-input input{background:#081522;border-color:#1d4055;color:#d5eaf4}

@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import { Activity, Award, Check, ChevronLeft, ChevronRight, CircleAlert, Download, Gift, LayoutDashboard, Pencil, Plus, RefreshCw, Settings, ShieldCheck, Trophy, Users, X } from 'lucide-react';
+import { DataState, downloadCsv, formatTime, RealMetric, RealTrend, useRemote } from './real-data';
+import './real-data.css';
+
+const statusLabel = { active: '近7天活跃', risk: '待跟进', pending: '待审核', approved: '已通过', rejected: '已驳回' };
+
+export function AdminDashboard({ go }) {
+  const [period, setPeriod] = useState(7);
+  const { data, loading, error, reload } = useRemote(`/api/analytics/dashboard?period=${period}`);
+  return <DataState loading={loading} error={error} onRetry={reload}>{data&&<div className="page-stack">
+    <div className="real-data-note"><span>积分统计 · {formatTime(data.generatedAt)}</span><div className="mini-toggle">{[7,30].map(value=><button key={value} className={period===value?'active':''} onClick={()=>setPeriod(value)}>近 {value} 天</button>)}</div></div>
+    <div className="metrics-grid"><RealMetric icon={Users} label="今日活跃学员" value={data.metrics.active} suffix=" 人" note={`共 ${data.totalStudents} 份同步档案`}/><RealMetric icon={Activity} label="今日学习参与率" value={data.metrics.participationRate} suffix="%" note="活跃学员 / 同步学员" tone="gold"/><RealMetric icon={Award} label="今日基础满分" value={data.metrics.full} suffix=" 人" note={`占活跃学员 ${data.metrics.fullRate}%`} tone="green"/><RealMetric icon={CircleAlert} label="近7天未学习得分" value={data.metrics.risk} suffix=" 人" note="按最近得分日期计算" tone="blue"/></div>
+    <div className="admin-main-grid"><section className="panel chart-panel"><div className="panel-heading"><div><h2>学习活跃趋势</h2><p>每日有学习得分人数与基础满分人数</p></div></div><RealTrend data={data.trend} lines={[{key:'active',name:'活跃学员',color:'#9f272d'},{key:'full',name:'基础满分',color:'#c38b36'}]}/></section><section className="panel channel-panel"><div className="panel-heading"><div><h2>今日栏目参与</h2><p>按同日同栏目去重学员</p></div></div>{data.channels.map(channel=><div className="channel-stat" key={channel.name}><div><strong>{channel.name}</strong><span>正常 {channel.time} 开播</span><b>{channel.rate}%</b></div><div className="bar"><i style={{width:`${channel.rate}%`}}/></div><small>{channel.participants.toLocaleString()} 人参与</small></div>)}</section></div>
+    <div className="admin-bottom-grid"><section className="panel"><div className="panel-heading"><div><h2>流失预警</h2><p>近 7 天没有学习得分的学员</p></div><button className="text-link" onClick={()=>go('students')}>查看学员 <ChevronRight/></button></div><div className="table-scroll"><table><thead><tr><th>学员</th><th>分部</th><th>累计积分</th><th>最近学习得分</th></tr></thead><tbody>{data.riskList.map(row=><tr key={row.id}><td><strong>{row.name}</strong><small className="cell-sub">{row.id}</small></td><td>{row.dept}</td><td>{row.score}</td><td>{row.lastLearning||'无记录'}</td></tr>)}</tbody></table></div>{!data.riskList.length&&<p className="real-empty-line">近 7 天没有流失预警学员</p>}</section><section className="panel quick-panel"><div className="panel-heading"><h2>业务入口</h2></div><div><button onClick={()=>go('students')}><Users/><span>学员管理</span></button><button onClick={()=>go('rewardsAdmin')}><Gift/><span>奖励配置</span></button><button onClick={()=>go('audit')}><ShieldCheck/><span>积分审核</span></button><button onClick={()=>go('rules')}><Settings/><span>计分规则</span></button></div></section></div>
+  </div>}</DataState>;
+}
+
+export function StudentsPage({ onAdjust }) {
+  const [input, setInput] = useState(''); const [query, setQuery] = useState(''); const [status, setStatus] = useState(''); const [dept, setDept] = useState(''); const [page, setPage] = useState(1);
+  const params = new URLSearchParams({ query, status, dept, page: String(page), pageSize: '20' });
+  const { data, loading, error, reload } = useRemote(`/api/students?${params}`);
+  const changeFilter = setter => value => { setter(value); setPage(1); };
+  return <div className="page-stack"><section className="panel table-page"><form className="table-toolbar" onSubmit={event=>{event.preventDefault();setPage(1);setQuery(input)}}><div className="search-box"><input value={input} onChange={event=>setInput(event.target.value)} placeholder="搜索姓名、精网号、分部或门店"/></div><button className="btn btn-outline" type="submit">查询</button><select value={status} onChange={event=>changeFilter(setStatus)(event.target.value)}><option value="">全部状态</option><option value="active">近7天活跃</option><option value="risk">待跟进</option></select><select value={dept} onChange={event=>changeFilter(setDept)(event.target.value)}><option value="">全部分部</option>{data?.departments.map(item=><option key={item}>{item}</option>)}</select><div className="toolbar-spacer"/><a className="btn btn-outline" href={`/api/students/export?${params}`}><Download/>导出名单</a></form>{data&&<div className="table-meta">共 <strong>{data.total}</strong> 名学员 <span>更新于 {formatTime(data.generatedAt)}</span></div>}<DataState loading={loading} error={error} onRetry={reload}>{data&&<><div className="table-scroll"><table><thead><tr><th>学员信息</th><th>分部 / 门店</th><th>等级</th><th>累计积分</th><th>今日积分</th><th>状态</th><th>最近学习</th><th>操作</th></tr></thead><tbody>{data.list.map(row=><tr key={row.id}><td><strong>{row.name}</strong><small className="cell-sub">{row.id}</small></td><td>{row.dept}<small className="cell-sub">{row.shop||'—'}</small></td><td>{row.level}</td><td>{row.score}</td><td>{row.today}</td><td><span className={`status-tag ${row.status==='active'?'success':'warning'}`}>{statusLabel[row.status]}</span></td><td>{row.lastLearning||'无记录'}</td><td><button className="text-link" onClick={()=>onAdjust(row)}>积分调整</button></td></tr>)}</tbody></table></div>{!data.list.length&&<p className="real-empty-line">没有符合筛选条件的学员</p>}<div className="pagination"><span>第 {data.page} / {data.totalPages} 页</span><button disabled={page<=1} onClick={()=>setPage(value=>value-1)}><ChevronLeft/></button><button disabled={page>=data.totalPages} onClick={()=>setPage(value=>value+1)}><ChevronRight/></button></div></>}</DataState></section></div>;
+}
+
+function RewardEditor({ initial, onClose, onSaved }) {
+  const [form, setForm] = useState(initial || { name: '', description: '', type: '学习权益', points: 0, stock: 0, enabled: true });
+  const [materialFile, setMaterialFile] = useState(null);
+  const [saving, setSaving] = useState(false); const [error, setError] = useState('');
+  const set = (key, value) => setForm(previous=>({ ...previous, [key]: value }));
+  const submit = async event => {
+    event.preventDefault(); setSaving(true); setError('');
+    try {
+      if(materialFile&&materialFile.size>20*1024*1024)throw new Error('PDF文件不能超过20MB');
+      const response = await fetch('/api/rewards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, points: Number(form.points), stock: Number(form.stock) }) });
+      const result = await response.json(); if (!response.ok) throw new Error(result.message);
+      setForm(result.item);
+      if(materialFile){
+        const upload = await fetch(`/api/rewards/${result.item.id}/material`, { method: 'POST', headers: { 'Content-Type': 'application/pdf' }, body: materialFile });
+        const uploaded = await upload.json(); if(!upload.ok)throw new Error(uploaded.message);
+      }
+      onSaved();
+    } catch (err) { setError(err.message); } finally { setSaving(false); }
+  };
+  return <div className="modal-backdrop"><form className="modal real-form-modal" onSubmit={submit}><button type="button" className="modal-close" onClick={onClose}><X/></button><h2>{initial?'编辑奖励':'新建奖励'}</h2><label>奖励名称<input value={form.name} onChange={event=>set('name',event.target.value)} required/></label><label>奖励说明<textarea value={form.description} onChange={event=>set('description',event.target.value)}/></label><label>奖励类型<select value={form.type} onChange={event=>{set('type',event.target.value);setMaterialFile(null)}}><option>学习权益</option><option>学习兑换</option><option>等级奖励</option><option>兑换奖励</option></select></label>{form.type!=='学习兑换'&&<label>装扮样式<select value={form.styleKey||''} onChange={event=>set('styleKey',event.target.value)}><option value="">无装扮</option><option value="avatar-frame-quench">淬火鎏金头像框</option><option value="avatar-frame-master">百炼宗师头像框</option><option value="rank-bubble-gold">鎏金排名气泡</option><option value="rank-bubble-red">百炼荣耀排名气泡</option><option value="theme-cute">软萌云朵主题</option><option value="theme-tech">星环科技主题</option></select></label>}{form.type==='学习兑换'&&<label>PDF学习资料<input type="file" accept="application/pdf,.pdf" required={!form.fileUrl} onChange={event=>setMaterialFile(event.target.files[0]||null)}/><small>{form.fileUrl?'已上传PDF，可重新选择文件替换':'请上传PDF文件，大小不超过20MB；保存奖励时一同上传'}</small></label>}<div className="real-form-grid"><label>积分门槛<input type="number" min="0" value={form.points} onChange={event=>set('points',event.target.value)} required/></label><label>总库存<input type="number" min="0" value={form.stock} onChange={event=>set('stock',event.target.value)} required/></label></div><label className="check-label"><input type="checkbox" checked={form.enabled} onChange={event=>set('enabled',event.target.checked)}/>上架允许领取</label>{error&&<p className="form-error">{error}</p>}<button className="btn btn-primary" disabled={saving}>{saving?(materialFile?'正在保存并上传PDF':'正在保存'):'保存奖励'}</button></form></div>;
+}
+
+export function RewardsAdmin({ notify }) {
+  const [tab, setTab] = useState('all'); const [editor, setEditor] = useState(null);
+  const { data, loading, error, reload } = useRemote('/api/rewards');
+  const save = async reward => {
+    const response = await fetch('/api/rewards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...reward, enabled: !reward.enabled }) });
+    const result = await response.json(); if (!response.ok) return notify(result.message);
+    notify(reward.enabled?'奖励已下架':'奖励已上架'); reload();
+  };
+  const list = data?.list.filter(item=>tab==='all'||(tab==='enabled'?item.enabled:!item.enabled)) || [];
+  return <div className="page-stack"><div className="real-data-note"><div className="tabs"><button className={tab==='all'?'active':''} onClick={()=>setTab('all')}>全部 {data?.list.length||0}</button><button className={tab==='enabled'?'active':''} onClick={()=>setTab('enabled')}>已上架</button><button className={tab==='disabled'?'active':''} onClick={()=>setTab('disabled')}>已下架</button></div><button className="btn btn-primary" onClick={()=>setEditor({})}><Plus/>新建奖励</button></div><DataState loading={loading} error={error} onRetry={reload} empty={!loading&&!error&&!list.length?'暂无奖励配置，请新建奖励。':''}><div className="admin-reward-grid">{list.map(reward=><section className="panel admin-reward-card" key={reward.id}><div className="admin-reward-body"><span>{reward.type} · {reward.points} 分门槛{reward.kind==='material'&&(reward.fileUrl?' · PDF已上传':' · 待上传PDF')}</span><h3>{reward.name}</h3><p>{reward.description||'未填写奖励说明'}</p><div className="stock-line"><span>剩余库存 <strong>{reward.remainingStock}</strong></span><span>总库存 {reward.stock}</span><span>已领取 {reward.claimedCount}</span></div><div className="admin-reward-actions"><button onClick={()=>setEditor(reward)}><Pencil/>编辑</button><button onClick={()=>save(reward)}>{reward.enabled?'下架':'上架'}</button></div></div></section>)}</div></DataState><section className="panel"><div className="panel-heading"><div><h2>领取记录</h2><p>每次领取均生成独立凭证</p></div></div><div className="table-scroll"><table><thead><tr><th>凭证号</th><th>学员</th><th>奖励</th><th>领取时间</th><th>状态</th></tr></thead><tbody>{data?.recentClaims.map(claim=><tr key={claim.id}><td>{claim.id}</td><td>{claim.studentName}<small className="cell-sub">{claim.jwcode}</small></td><td>{claim.rewardName}</td><td>{formatTime(claim.createdAt)}</td><td>已领取</td></tr>)}</tbody></table></div>{data&&!data.recentClaims.length&&<p className="real-empty-line">暂无奖励领取记录</p>}</section>{editor&&<RewardEditor initial={editor.id?editor:null} onClose={()=>setEditor(null)} onSaved={()=>{setEditor(null);notify('奖励配置已保存');reload()}}/>}</div>;
+}
+
+export function AuditPage({ notify }) {
+  const [status, setStatus] = useState('pending'); const [working, setWorking] = useState('');
+  const { data, loading, error, reload } = useRemote(`/api/adjustments?status=${status}`);
+  const review = async (item, decision) => {
+    setWorking(item.id);
+    const response = await fetch(`/api/adjustments/${item.id}/review`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ decision }) });
+    const result = await response.json(); setWorking('');
+    if (!response.ok) return notify(result.message);
+    notify(decision==='approved'?'审核通过，积分入账':'申请已驳回'); reload();
+  };
+  const exportRows = () => downloadCsv(`point-adjustments-${status}.csv`, [{key:'id',label:'申请号'},{key:'jwcode',label:'精网号'},{key:'studentName',label:'姓名'},{key:'points',label:'调整积分'},{key:'reason',label:'原因'},{key:'status',label:'状态'},{key:'createdAt',label:'申请时间'},{key:'reviewedByName',label:'审核人'}], data?.list||[]);
+  return <div className="page-stack"><div className="real-data-note"><div className="tabs">{[['pending','待审核'],['approved','已通过'],['rejected','已驳回'],['','全部记录']].map(([value,label])=><button key={value} className={status===value?'active':''} onClick={()=>setStatus(value)}>{label}</button>)}</div><button className="btn btn-outline" onClick={exportRows}><Download/>导出当前记录</button></div><DataState loading={loading} error={error} onRetry={reload} empty={!loading&&!error&&!data?.list.length?'当前状态下没有调整申请。':''}><section className="panel"><div className="table-scroll"><table><thead><tr><th>申请号 / 来源</th><th>学员</th><th>调整</th><th>原因</th><th>申请人 / 时间</th><th>审核信息</th><th>操作</th></tr></thead><tbody>{data?.list.map(item=><tr key={item.id}><td>{item.id}<small className="cell-sub">{item.source==='appeal'?'学员申诉':'管理员创建'}</small></td><td>{item.studentName}<small className="cell-sub">{item.jwcode}</small></td><td><strong>{item.points>0?'+':''}{item.points}</strong></td><td className="reason-cell">{item.reason}</td><td>{item.requestedByName}<small className="cell-sub">{formatTime(item.createdAt)}</small></td><td>{item.status==='pending'?statusLabel.pending:<>{statusLabel[item.status]}<small className="cell-sub">{item.reviewedByName} · {formatTime(item.reviewedAt)}</small></>}</td><td>{item.status==='pending'&&<div className="row-actions"><button disabled={working===item.id} onClick={()=>review(item,'approved')}><Check/>通过</button><button disabled={working===item.id} onClick={()=>review(item,'rejected')}>驳回</button></div>}</td></tr>)}</tbody></table></div></section></DataState></div>;
+}

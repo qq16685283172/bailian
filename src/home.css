@@ -1,0 +1,84 @@
+/* 首页 / 任务中心 / 排行榜：补齐组件引用但旧样式表缺失的类，并统一视觉层级 */
+
+.auth-boot{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:10px;color:#98262c;font-size:14px;background:#f6f4f0}
+.auth-boot svg{animation:real-spin 1.4s linear infinite}
+
+/* Hero：大数字、进度环、锻炉徽章 */
+.hero-score{display:flex;align-items:flex-end;gap:28px;margin-top:20px;padding-bottom:30px}
+.hero-score>div{display:flex;flex-direction:column;gap:4px}
+.hero-score strong{font-size:54px;line-height:1;font-weight:800}
+.hero-score span{font-size:11px;letter-spacing:2px;opacity:.85}
+.hero-score .progress-ring{width:76px;height:76px;margin-bottom:4px;color:#f3c989}
+.hero-score .progress-ring .ring-bg{stroke:rgba(255,232,196,.22)}
+.hero-score .progress-ring>strong{font-size:21px;letter-spacing:0;background:none;-webkit-background-clip:initial;background-clip:initial;color:#ffe6bd;-webkit-text-fill-color:#ffe6bd;filter:none}
+.hero-score .progress-ring>strong span{font-size:10px;letter-spacing:0;color:#e9c49a;opacity:1}
+.hero-mascot{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding-bottom:26px;color:#ffe6bd;text-align:center}
+.hero-mascot strong{font-size:17px;letter-spacing:4px}
+.hero-mascot span{font-size:10px;letter-spacing:1px;opacity:.78}
+.mascot-mark{display:grid;place-items:center;width:80px;height:80px;margin-bottom:10px;border-radius:26px;background:linear-gradient(150deg,rgba(255,222,170,.3),rgba(255,180,90,.05));border:1px solid rgba(255,222,170,.38);box-shadow:0 16px 42px -14px rgba(255,170,80,.55),inset 0 1px 0 rgba(255,255,255,.28)}
+.mascot-mark svg{width:36px;height:36px;color:#ffd9a0}
+
+/* 首页排名三卡 */
+.rank-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.rank-cards>div{position:relative;display:flex;flex-direction:column;gap:5px;padding:16px 15px;border-radius:12px;background:linear-gradient(160deg,#fffdf9,#faf3e8);border:1px solid #f0e5d3}
+.rank-cards svg{width:18px;height:18px;color:#c6974d}
+.rank-cards span{font-size:10px;color:#96887a}
+.rank-cards strong{font-size:25px;line-height:1.1;color:#7c1a20}
+.rank-cards small{font-size:9px;color:#a89a8b;line-height:1.5}
+
+/* 成长等级卡片（覆盖旧版小徽章样式） */
+.level-widget .panel-heading>span{font-size:12px;font-weight:700;color:#c6974d}
+.level-widget .level-badge{display:flex;flex-direction:column;align-items:center;gap:4px;margin:4px 0 14px;padding:18px 12px;border-radius:12px;background:linear-gradient(140deg,#8b1c22,#b03a2e 58%,#c6974d);color:#fff;font-weight:400;box-shadow:0 14px 30px -18px rgba(139,28,34,.75)}
+.level-widget .level-badge span{font-size:11px;letter-spacing:5px;color:#f6d9a8}
+.level-widget .level-badge strong{font-size:20px;letter-spacing:1px}
+.level-widget .level-badge small{font-size:10px;color:#f3d6b4}
+
+/* 奖励进度卡（旧版 grid 会把标题挤成竖排） */
+.next-reward{display:block;padding:20px}
+.next-reward .panel-heading{margin-bottom:10px}
+.next-reward>span{display:inline-block;font-size:10px;color:#a48251}
+.next-reward h3{font-size:17px;margin:6px 0 8px;color:#4a2f22}
+.next-reward p{font-size:11px;line-height:1.75;color:#8c7a68}
+.next-reward .reward-progress{margin:14px 0 4px}
+.next-reward .btn{width:100%;margin-top:14px}
+
+/* 任务中心统计 */
+.task-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.task-summary-grid .panel{display:flex;flex-direction:column;gap:8px;padding:16px 18px}
+.task-summary-grid span{font-size:11px;color:#94897f}
+.task-summary-grid strong{font-size:27px;line-height:1.1;color:#7c1a20}
+
+/* 排行榜页头 */
+.ranking-hero{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:26px 30px;border-radius:16px;background:linear-gradient(120deg,#7f1c23,#a22a2d 62%,#8b1c22);color:#fff;border:1px solid rgba(255,214,150,.16);box-shadow:0 22px 48px -28px rgba(103,24,29,.65)}
+.ranking-hero>div:first-child>span{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#f2cf9f}
+.ranking-hero h2{margin:10px 0 6px;font-size:22px;letter-spacing:.5px}
+.ranking-hero p{font-size:11px;color:#e8c3a6}
+.ranking-hero>div:last-child{display:flex;flex-direction:column;gap:4px;text-align:right;flex-shrink:0}
+.ranking-hero small{font-size:10px;color:#e8c3a6}
+.ranking-hero strong{font-size:34px;line-height:1.1}
+.ranking-hero>div:last-child>span{font-size:11px;color:#f2cf9f}
+
+/* 个人中心：客服入口与按钮保持一致 */
+.profile-menu a{display:flex;align-items:center;width:100%;gap:11px;min-height:50px;padding:17px 0;border:0;border-bottom:1px solid #eee9e2;background:none;color:#7d746b;text-align:left;text-decoration:none}
+.profile-menu a:last-child{border-bottom:0}
+.profile-menu a>svg:first-child{width:18px;color:#a88a5c}
+.profile-menu a>span{flex:1;font-size:13px}
+.profile-menu a>small{font-size:10px;color:#9e3438}
+.profile-menu a:hover{color:#8e252a}
+
+@media(max-width:1100px){
+  .hero-score strong{font-size:44px}
+  .task-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .hero-mascot{display:none}
+  .hero-score{gap:18px;margin-top:16px;padding-bottom:20px}
+  .hero-score strong{font-size:40px}
+  .rank-cards{grid-template-columns:1fr 1fr}
+  .rank-cards>div:last-child{grid-column:1/-1}
+  .ranking-hero{flex-direction:column;align-items:flex-start;padding:20px}
+  .ranking-hero>div:last-child{text-align:left}
+  .task-summary-grid{gap:12px}
+  .task-summary-grid .panel{padding:13px 14px}
+  .task-summary-grid strong{font-size:22px}
+}
