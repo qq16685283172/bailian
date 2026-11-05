@@ -26,12 +26,22 @@ npm run dev
 
 **关于 `.env`**：里面只有 `LIVE_LIST_URL` 是真正的凭证（含 token 与 pd_id），向项目负责人单独索取。没有它也能正常开发和预览页面，只是「听课数据同步」不可用。真实凭证**不要提交、不要发群里**。
 
+### 跑测试
+
+```bash
+npm test           # 跑一遍全部用例，约 0.3 秒
+npm run test:watch # 开发时监听文件变化
+```
+
+计分规则（`server/scoring.js`）目前有 26 个用例，覆盖时段归类、观看阈值、翻倍不连乘、活动分、人工调整与汇总统计。**改计分逻辑前先跑测试，改完必须全绿**；GitHub Actions 会在每次 push 和 PR 时自动执行。
+
 ## 3. 目录说明
 
 | 目录 / 文件 | 作用 | 是否提交 |
 | --- | --- | --- |
 | `src/` | 前端页面，React + Vite | ✅ |
 | `server/` | 后端，Express + `node:sqlite` | ✅ |
+| `tests/` | Vitest 测试用例 | ✅ |
 | `server/data/` | 运行时数据：SQLite 数据库、账号、凭证 | ❌ 已在 .gitignore |
 | `server/materials/` | 学员上传/下载的资料 PDF | ❌ 已在 .gitignore |
 | `dist/` | 前端构建产物，`npm run build` 生成 | ❌ 已在 .gitignore |
