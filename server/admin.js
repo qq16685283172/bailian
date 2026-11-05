@@ -89,7 +89,16 @@ export function getStudents(store, options = {}) {
   const pageSize = Math.min(100, Math.max(10, Number(options.pageSize) || 20));
   const all = studentRows(store).map(row => publicRow(row, today));
   const filtered = all.filter(row => (!query || `${row.name} ${row.id} ${row.dept} ${row.shop}`.toLowerCase().includes(query)) && (!dept || row.dept === dept) && (!status || row.status === status));
-  filtered.sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
+  const sortKey = ['score', 'today', 'lastLearning', 'name', 'id'].includes(String(options.sort)) ? String(options.sort) : 'score';
+  const direction = String(options.dir) === 'asc' ? 1 : -1;
+  filtered.sort((a, b) => {
+    const left = a[sortKey] ?? '';
+    const right = b[sortKey] ?? '';
+    const compare = typeof left === 'number' && typeof right === 'number'
+      ? left - right
+      : String(left).localeCompare(String(right), 'zh-CN');
+    return compare * direction || a.id.localeCompare(b.id);
+  });
   return {
     list: filtered.slice((page - 1) * pageSize, page * pageSize), all: filtered,
     total: filtered.length, page, pageSize, totalPages: Math.max(1, Math.ceil(filtered.length / pageSize)),
