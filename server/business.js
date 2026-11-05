@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getBehaviorAnalytics, getDashboard, getOperationsAnalytics, getStudents } from './admin.js';
+import { buildStudentWorkbook } from './export.js';
 import { shanghaiDate } from './client.js';
 import { rebuildDailyPoints } from './scoring.js';
 import { loadStore, saveStore } from './store.js';
@@ -40,6 +41,14 @@ function adjustmentInput(req, res, student, source) {
   return { id: id('adj'), jwcode: student.jwcode, studentName: student.name, points, reason, source, status: 'pending', effectiveDate: shanghaiDate(), requestedBy: req.auth.user.jwcode, requestedByName: req.auth.user.name, createdAt: new Date().toISOString() };
 }
 
+function describeFilters(query = {}) {
+  const parts = [];
+  if (query.query) parts.push(`搜索「${query.query}」`);
+  if (query.dept) parts.push(`分部=${query.dept}`);
+  if (query.status) parts.push(`状态=${query.status === 'active' ? '近7天活跃' : '待跟进'}`);
+  return parts.length ? parts.join('；') : '';
+}
+
 export function registerBusinessRoutes(app, requireAdmin) {
   app.get('/api/analytics/dashboard', requireAdmin, (req, res) => res.json(getDashboard(loadStore(), req.query.period)));
   app.get('/api/analytics/behavior', requireAdmin, (req, res) => res.json(getBehaviorAnalytics(loadStore(), req.query.period, text(req.query.dept, 100))));
@@ -50,13 +59,22 @@ export function registerBusinessRoutes(app, requireAdmin) {
     res.json(result);
   });
 
-  app.get('/api/students/export', requireAdmin, (req, res) => {
-    const result = getStudents(loadStore(), { ...req.query, pageSize: 100 });
+  app.get('/api/students/export', requireAdmin, async (req, res, next) => {
+    try {
+      const result = getStudents(loadStore(), { ...req.query, pageSize: 100 });
+      const stamp = shanghaiDate();
+      if (req.query.format !== 'csv') {
+        const buffer = await buildStudentWorkbook(result.all, { generatedAt: new Date().toLocaleString('zh-CN', { hour12: false }), filters: describeFilters(req.query) });
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="bailian-students-${stamp}.xlsx"`);
+        return res.send(buffer);
+      }
     const escape = value => `"${String(value ?? '').replaceAll('"', '""')}"`;
     const rows = [['精网号', '姓名', '分部', '门店', '等级', '累计积分', '今日积分', '状态', '最近学习得分日期'], ...result.all.map(row => [row.id, row.name, row.dept, row.shop, row.level, row.score, row.today, row.status === 'active' ? '近7天活跃' : '待跟进', row.lastLearning || '无记录'])];
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="bailian-students-${shanghaiDate()}.csv"`);
-    res.send(`\uFEFF${rows.map(row => row.map(escape).join(',')).join('\r\n')}`);
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="bailian-students-${stamp}.csv"`);
+      res.send(`\uFEFF${rows.map(row => row.map(escape).join(',')).join('\r\n')}`);
+    } catch (error) { next(error); }
   });
 
   app.post('/api/students/:jwcode/adjustments', requireAdmin, (req, res) => {
