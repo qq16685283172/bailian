@@ -39,7 +39,7 @@ export function RealTrend({ data, lines, height = 260 }) {
 }
 
 export function downloadCsv(filename, columns, rows) {
-  const escape = value => `"${String(value ?? '').replaceAll('"', '""')}"`;
+  const escape = value => `"${String(value ?? '').split('"').join('""')}"`;
   const content = `\uFEFF${[columns.map(column=>column.label), ...rows.map(row=>columns.map(column=>row[column.key]))].map(row=>row.map(escape).join(',')).join('\r\n')}`;
   const url = URL.createObjectURL(new Blob([content], { type: 'text/csv;charset=utf-8' }));
   const anchor = document.createElement('a');

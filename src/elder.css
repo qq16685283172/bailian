@@ -153,7 +153,7 @@ body{font-size:15px}
 
 /* 奖励区域紧凑化：保留易读字号与足够大的操作按钮 */
 .rewards-page{animation:none}
-.rewards-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.rewards-grid{grid-template-columns:repeat(auto-fill,minminmax(220px,1fr));gap:14px}
 .rewards-page .reward-card{border-radius:13px}
 .rewards-page .reward-card-top{height:108px}
 .rewards-page .reward-info{padding:14px}

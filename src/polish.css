@@ -1,14 +1,14 @@
 /* 百炼计划 · 视觉升级层（在 styles.css 之后加载，仅做增强不改结构） */
 
 /* 首页 WebGL 场景 */
-.hero-canvas{position:absolute;inset:0;z-index:0;background:radial-gradient(120% 130% at 85% 0%,#a52c2c 0%,#7c161f 55%,#4d0a12 100%)}
+.hero-canvas{position:absolute;top:0;right:0;bottom:0;left:0;z-index:0;background:radial-gradient(120% 130% at 85% 0%,#a52c2c 0%,#7c161f 55%,#4d0a12 100%)}
 .hero-canvas-gl{display:block;width:100%;height:100%}
-.hero-canvas::after{content:'';position:absolute;inset:0;background:linear-gradient(92deg,rgba(56,7,13,.62) 0%,rgba(56,7,13,.34) 42%,rgba(56,7,13,.05) 72%,transparent 100%);pointer-events:none}
+.hero-canvas::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(92deg,rgba(56,7,13,.62) 0%,rgba(56,7,13,.34) 42%,rgba(56,7,13,.05) 72%,transparent 100%);pointer-events:none}
 .hero{border:1px solid rgba(255,214,150,.16);box-shadow:0 24px 55px -26px rgba(103,24,29,.6),inset 0 1px 0 rgba(255,225,180,.12)}
 .hero-pattern{mix-blend-mode:screen;opacity:.7}
 .hero-copy{text-shadow:0 2px 16px rgba(40,4,8,.35)}
 .hero h1{letter-spacing:.6px}
-.hero .eyebrow{backdrop-filter:blur(6px);background:rgba(255,236,205,.12);border-color:rgba(255,222,170,.28);box-shadow:0 4px 18px -8px rgba(0,0,0,.4)}
+.hero .eyebrow{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);background:rgba(255,236,205,.12);border-color:rgba(255,222,170,.28);box-shadow:0 4px 18px -8px rgba(0,0,0,.4)}
 .hero-score strong{font-variant-numeric:tabular-nums;letter-spacing:-1px;background:linear-gradient(180deg,#fffaf2 20%,#ffd9a0 90%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 14px rgba(255,180,90,.25))}
 .hero-score span{letter-spacing:2px;color:#f0cda2}
 .hero-mascot{filter:drop-shadow(0 12px 30px rgba(255,140,60,.18))}
@@ -34,7 +34,7 @@
 .rank-cards>div{transition:transform .25s ease,box-shadow .25s ease}
 .rank-cards>div:hover{transform:translateY(-3px)}
 .level-badge{position:relative;overflow:hidden}
-.level-badge::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,232,190,.22) 48%,transparent 62%);transform:translateX(-100%);animation:badge-sheen 5.5s ease-in-out infinite}
+.level-badge::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(115deg,transparent 30%,rgba(255,232,190,.22) 48%,transparent 62%);transform:translateX(-100%);animation:badge-sheen 5.5s ease-in-out infinite}
 @keyframes badge-sheen{0%,55%{transform:translateX(-100%)}85%,100%{transform:translateX(100%)}}
 .level-progress>div>i,.reward-progress>div>i{background:linear-gradient(90deg,#c6974d,#f0cf92);box-shadow:0 0 12px rgba(198,151,77,.35)}
 .ledger-row{transition:background .2s ease}
@@ -48,7 +48,7 @@
 
 /* 小AI 入口的呼吸光环 */
 .ai-fab{isolation:isolate}
-.ai-fab::after{content:'';position:absolute;inset:-3px;border-radius:inherit;border:1px solid rgba(198,151,77,.55);z-index:-1;animation:ai-ring 3s ease-out infinite}
+.ai-fab::after{content:'';position:absolute;top:-3px;right:-3px;bottom:-3px;left:-3px;border-radius:inherit;border:1px solid rgba(198,151,77,.55);z-index:-1;animation:ai-ring 3s ease-out infinite}
 @keyframes ai-ring{0%{transform:scale(.96);opacity:.9}70%{transform:scale(1.12);opacity:0}100%{opacity:0}}
 
 /* 数字使用等宽数字，避免跳动 */
