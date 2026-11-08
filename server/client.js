@@ -8,8 +8,10 @@ const levels = [
 ];
 const channelIds = { 财经壹眼: 'morning', 三点启航: 'afternoon', 易学久会: 'evening' };
 
+const SHANGHAI_FORMATTER = new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' });
+
 export function shanghaiDate(date = new Date()) {
-  const parts = new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
+  const parts = SHANGHAI_FORMATTER.formatToParts(date);
   const get = type => parts.find(p => p.type === type)?.value;
   return `${get('year')}-${get('month')}-${get('day')}`;
 }

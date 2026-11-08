@@ -1,4 +1,5 @@
 import { levelFor, shanghaiDate } from './client.js';
+import { loadStore, storeVersion } from './store.js';
 
 const DAY = 86400000;
 const round = value => Math.round((value + Number.EPSILON) * 100) / 100;
@@ -11,6 +12,33 @@ function periodRange(period) {
   const today = shanghaiDate();
   const start = shift(today, -(days - 1));
   return { today, start, days, dates: Array.from({ length: days }, (_, index) => shift(start, index)) };
+}
+
+const statsMemo = { version: -1, store: null, value: null };
+
+/** buildStats 要遍历 21.8 万条日积分，按 storeVersion 缓存，数据一变自动失效 */
+function buildStatsCached(store) {
+  const version = storeVersion();
+  if (statsMemo.value && statsMemo.version === version && statsMemo.store === store) return statsMemo.value;
+  const value = buildStats(store);
+  statsMemo.version = version;
+  statsMemo.store = store;
+  statsMemo.value = value;
+  return value;
+}
+
+const resultMemo = new Map();
+
+/** 把重计算的分析结果按「参数 + 数据版本」缓存，避免每次请求重算 */
+export function memo(key, compute) {
+  const store = loadStore();
+  const version = storeVersion();
+  const hit = resultMemo.get(key);
+  if (hit && hit.version === version) return hit.value;
+  const value = compute(store);
+  resultMemo.set(key, { version, value });
+  if (resultMemo.size > 40) resultMemo.clear();
+  return value;
 }
 
 function buildStats(store) {
@@ -37,7 +65,7 @@ function buildStats(store) {
 }
 
 function studentRows(store) {
-  const stats = buildStats(store);
+  const stats = buildStatsCached(store);
   return Object.values(store.students).map(student => {
     const stat = stats.get(student.jwcode) || { todayScore: 0, lastLearning: '', lastPoints: '', activeDates: new Set(), baseByDate: new Map(), channels: new Map() };
     return {
@@ -49,8 +77,7 @@ function studentRows(store) {
   });
 }
 
-function publicRow(row, today) {
-  const weekStart = shift(today, -6);
+function publicRow(row, weekStart) {
   return {
     id: row.id, name: row.name, dept: row.dept, shop: row.shop, level: row.level, score: row.score, today: row.today,
     status: row.lastLearning && row.lastLearning >= weekStart ? 'active' : 'risk',
@@ -76,7 +103,7 @@ export function getDashboard(store, period = 7) {
     today, period: days, generatedAt: new Date().toISOString(), totalStudents: rows.length,
     metrics: { active: todayActive.length, participationRate: percent(todayActive.length, rows.length), full: fullToday.length, fullRate: percent(fullToday.length, todayActive.length), risk: risk.length },
     trend, channels,
-    riskList: risk.sort((a, b) => String(a.lastLearning || '').localeCompare(String(b.lastLearning || '')) || b.score - a.score).slice(0, 6).map(row => publicRow(row, today)),
+    riskList: risk.sort((a, b) => String(a.lastLearning || '').localeCompare(String(b.lastLearning || '')) || b.score - a.score).slice(0, 6).map(row => publicRow(row, shift(today, -6))),
   };
 }
 
@@ -87,7 +114,8 @@ export function getStudents(store, options = {}) {
   const status = String(options.status || '');
   const page = Math.max(1, Number(options.page) || 1);
   const pageSize = Math.min(100, Math.max(10, Number(options.pageSize) || 20));
-  const all = studentRows(store).map(row => publicRow(row, today));
+  const weekStart = shift(today, -6);
+  const all = studentRows(store).map(row => publicRow(row, weekStart));
   const filtered = all.filter(row => (!query || `${row.name} ${row.id} ${row.dept} ${row.shop}`.toLowerCase().includes(query)) && (!dept || row.dept === dept) && (!status || row.status === status));
   const sortKey = ['score', 'today', 'lastLearning', 'name', 'id'].includes(String(options.sort)) ? String(options.sort) : 'score';
   const direction = String(options.dir) === 'asc' ? 1 : -1;

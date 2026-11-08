@@ -11,6 +11,7 @@ import { getClientSnapshot, getRanking } from './client.js';
 import { changePassword as savePassword, endSession, getSession, hasCustomPassword, requireAdmin, requireAuth, revokeOtherSessions, startSession, verifyPassword } from './auth.js';
 import { allCredentialStatus, credentialStatus, getListUrl, saveListUrl } from './credentials.js';
 import { registerBusinessRoutes } from './business.js';
+import { getBehaviorAnalytics, getDashboard, getOperationsAnalytics, getStudents, memo } from './admin.js';
 import { aiEngine, aiSuggestions, askAI } from './ai.js';
 
 const app = express();
@@ -102,13 +103,21 @@ app.post('/api/credentials/:platform/test', async (req, res) => {
 
 app.get('/api/sync/status', (req, res) => {
   const store = loadStore();
-  const attendance = Object.values(store.attendance);
+  const totals = memo('sync-totals', (current) => {
+    let points = 0;
+    for (const item of Object.values(current.dailyPoints)) points += item.score || 0;
+    return {
+      lives: Object.keys(current.lives).length,
+      attendance: Object.keys(current.attendance).length,
+      students: Object.keys(current.students).length,
+      points: Math.round(points * 100) / 100,
+    };
+  });
   res.json({
     configured: activePlatforms().length > 0, platforms: activePlatforms(), running: getRunning(), lastRun: store.syncRuns[0] || null,
     schedule: ['每天 12:00', '每天 24:00'], nextRun: getNextRun(timeZone), timeZone,
     lookbackDays: Number(process.env.SYNC_LOOKBACK_DAYS || 2), classSource: store.settings,
-    storage: storageInfo(),
-    totals: { lives: Object.keys(store.lives).length, attendance: attendance.length, students: Object.keys(store.students).length, points: Object.values(store.dailyPoints).reduce((sum, item) => sum + item.score, 0) },
+    storage: storageInfo(), totals,
   });
 });
 
@@ -323,4 +332,23 @@ if (fs.existsSync(dist)) {
   app.use((req, res, next) => req.path.startsWith('/api/') ? next() : res.sendFile(path.join(dist, 'index.html')));
 }
 
-app.listen(port, () => console.log(`百炼同步服务已启动：http://localhost:${port}，定时：12:00 / 24:00（${timeZone}）`));
+app.listen(port, () => {
+  console.log(`百炼同步服务已启动：http://localhost:${port}，定时：12:00 / 24:00（${timeZone}）`);
+  // 启动后预热统计缓存，避免第一次登录等重算
+  setTimeout(() => {
+    const started = Date.now();
+    try {
+      const store = loadStore();
+      memo('dashboard:7', (current) => getDashboard(current, 7));
+      memo('behavior:7:', (current) => getBehaviorAnalytics(current, 7, ''));
+      memo('operations:7:', (current) => getOperationsAnalytics(current, 7, ''));
+      getStudents(store, {});
+      memo('sync-totals', (current) => {
+        let points = 0;
+        for (const item of Object.values(current.dailyPoints)) points += item.score || 0;
+        return { lives: Object.keys(current.lives).length, attendance: Object.keys(current.attendance).length, students: Object.keys(current.students).length, points: Math.round(points * 100) / 100 };
+      });
+      console.log(`[warmup] 统计缓存预热完成，耗时 ${Date.now() - started}ms`);
+    } catch (error) { console.error('[warmup]', error.message); }
+  }, 3000);
+});

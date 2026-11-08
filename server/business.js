@@ -3,7 +3,7 @@ import express from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getBehaviorAnalytics, getDashboard, getOperationsAnalytics, getStudents } from './admin.js';
+import { getBehaviorAnalytics, getDashboard, getOperationsAnalytics, getStudents, memo } from './admin.js';
 import { buildStudentWorkbook } from './export.js';
 import { shanghaiDate } from './client.js';
 import { rebuildDailyPoints } from './scoring.js';
@@ -50,9 +50,9 @@ function describeFilters(query = {}) {
 }
 
 export function registerBusinessRoutes(app, requireAdmin) {
-  app.get('/api/analytics/dashboard', requireAdmin, (req, res) => res.json(getDashboard(loadStore(), req.query.period)));
-  app.get('/api/analytics/behavior', requireAdmin, (req, res) => res.json(getBehaviorAnalytics(loadStore(), req.query.period, text(req.query.dept, 100))));
-  app.get('/api/analytics/operations', requireAdmin, (req, res) => res.json(getOperationsAnalytics(loadStore(), req.query.period, text(req.query.dept, 100))));
+  app.get('/api/analytics/dashboard', requireAdmin, (req, res) => res.json(memo(`dashboard:${req.query.period || 7}`, (store) => getDashboard(store, req.query.period))));
+  app.get('/api/analytics/behavior', requireAdmin, (req, res) => res.json(memo(`behavior:${req.query.period || 7}:${text(req.query.dept, 100)}`, (store) => getBehaviorAnalytics(store, req.query.period, text(req.query.dept, 100)))));
+  app.get('/api/analytics/operations', requireAdmin, (req, res) => res.json(memo(`operations:${req.query.period || 7}:${text(req.query.dept, 100)}`, (store) => getOperationsAnalytics(store, req.query.period, text(req.query.dept, 100)))));
 
   app.get('/api/students', requireAdmin, (req, res) => {
     const { all, ...result } = getStudents(loadStore(), req.query);
