@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const file = path.join(path.dirname(fileURLToPath(import.meta.url)), 'data', 'credentials.json');
 const platforms = {
   xxcg: { name: '精网 · 开直播', host: 'mp.xxcg.com', env: 'LIVE_LIST_URL', active: true },
-  toujiao: { name: '投教原创', host: 'toujiao.hlquant.com', env: 'TOUJIAO_LIST_URL', active: false },
+  toujiao: { name: '投教原创', host: 'toujiao.hlquant.com', env: 'TOUJIAO_LIST_URL', active: true },
 };
 
 function readSaved() {

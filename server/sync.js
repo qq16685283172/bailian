@@ -58,11 +58,11 @@ function summarizeUsers(records) {
   return new Set(records.map(row => String(row.jwcode || '')).filter(Boolean)).size;
 }
 
-export async function runSync({ days = Number(process.env.SYNC_LOOKBACK_DAYS || 2), trigger = 'manual', classId = '', className = '' } = {}) {
+export async function runSync({ days = Number(process.env.SYNC_LOOKBACK_DAYS || 2), trigger = 'manual', classId = '', className = '', platform = 'xxcg' } = {}) {
   if (running) throw new Error('已有同步任务正在运行');
-  if (!getListUrl('xxcg')) throw new Error('尚未配置 LIVE_LIST_URL');
+  if (!getListUrl(platform)) throw new Error(`尚未配置 ${platform} 数据源`);
   const startedAt = new Date().toISOString();
-  const run = { id: `SYNC${Date.now()}`, trigger, days, source: classId ? 'class' : 'channel', classId: String(classId || ''), className, startedAt, finishedAt: null, status: 'running', courses: 0, attendance: 0, comments: 0, gifts: 0, newRecords: 0, students: 0, errors: [] };
+  const run = { id: `SYNC${Date.now()}`, trigger, days, platform, source: classId ? 'class' : 'channel', classId: String(classId || ''), className, startedAt, finishedAt: null, status: 'running', courses: 0, attendance: 0, comments: 0, gifts: 0, newRecords: 0, students: 0, errors: [] };
   const store = loadStore();
   store.syncRuns.unshift(run);
   store.syncRuns = store.syncRuns.slice(0, 50);
@@ -73,7 +73,7 @@ export async function runSync({ days = Number(process.env.SYNC_LOOKBACK_DAYS || 
   running = { id: run.id, startedAt, processed: 0, total: 0, currentCourse: '正在获取直播清单' };
 
   try {
-    const client = new XxcgClient(getListUrl('xxcg'));
+    const client = new XxcgClient(getListUrl(platform));
     const lives = classId ? await client.listClassLives(classId, days) : await client.listLives(days);
     running.total = lives.length;
     running.source = classId ? 'class' : 'channel';
@@ -109,9 +109,13 @@ export async function runSync({ days = Number(process.env.SYNC_LOOKBACK_DAYS || 
           };
           store.students[jwcode] = { ...(store.students[jwcode] || {}), jwcode, name: row.name || '未命名学员', dept: row.dept_name || '', shop: row.shop_name || '', totalPoints: store.students[jwcode]?.totalPoints || 0 };
         }
+        const existingLive = store.lives[liveId];
+        if (existingLive && existingLive.platform && existingLive.platform !== platform && existingLive.startTime !== live.start_time) {
+          throw new Error(`直播 ID ${liveId} 已被 ${existingLive.platform} 占用（${existingLive.startTime}），与本次 ${live.start_time} 冲突`);
+        }
         store.lives[liveId] = {
           id: liveId, roomId: String(live.room_id), name: live.name, startTime: live.start_time, date: live.start_time.slice(0, 10),
-          source: classId ? 'class' : 'channel', classId: String(classId || ''), className,
+          source: classId ? 'class' : 'channel', classId: String(classId || ''), className, platform,
           channel: channelFor(live.start_time, store.scoring.baseChannels), attendanceCount: watch.length, participantCount: summarizeUsers(watch), commentCount: comments.length,
           giftCount: gifts.filter(item => giftNames.includes(item.gift_name)).length, status: 'success', syncedAt: new Date().toISOString(),
         };

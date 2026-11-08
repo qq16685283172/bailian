@@ -104,7 +104,7 @@ app.get('/api/sync/status', (req, res) => {
   const store = loadStore();
   const attendance = Object.values(store.attendance);
   res.json({
-    configured: Boolean(getListUrl('xxcg')), running: getRunning(), lastRun: store.syncRuns[0] || null,
+    configured: activePlatforms().length > 0, platforms: activePlatforms(), running: getRunning(), lastRun: store.syncRuns[0] || null,
     schedule: ['每天 12:00', '每天 24:00'], nextRun: getNextRun(timeZone), timeZone,
     lookbackDays: Number(process.env.SYNC_LOOKBACK_DAYS || 2), classSource: store.settings,
     storage: storageInfo(),
@@ -127,7 +127,12 @@ app.post('/api/sync/test', async (req, res) => {
 app.post('/api/sync/run', (req, res) => {
   if (getRunning()) return res.status(409).json({ message: '已有同步任务正在运行' });
   const days = Math.min(365, Math.max(1, Number(req.body?.days || process.env.SYNC_LOOKBACK_DAYS || 2)));
-  runSync({ days, trigger: 'manual' }).catch(error => console.error('[sync]', error.message));
+  (async () => {
+    for (const platform of activePlatforms()) {
+      try { await runSync({ days, trigger: 'manual', platform }); }
+      catch (error) { console.error(`[sync/${platform}]`, error.message); }
+    }
+  })();
   res.status(202).json({ accepted: true, days, message: `已开始补查最近 ${days} 天` });
 });
 
@@ -286,12 +291,17 @@ app.get('/api/client/:jwcode', (req, res) => {
   res.json(snapshot);
 });
 
+const SYNC_PLATFORMS = ['xxcg', 'toujiao'];
+function activePlatforms() { return SYNC_PLATFORMS.filter((item) => getListUrl(item)); }
+
 async function executeScheduled(trigger) {
   if (getRunning()) return console.log(`[${trigger}] 上次任务未完成，本次跳过`);
-  try {
-    const run = await runSync({ trigger });
-    console.log(`[${trigger}] ${run.status}: ${run.courses} 场`);
-  } catch (error) { console.error(`[${trigger}]`, error.message); }
+  for (const platform of activePlatforms()) {
+    try {
+      const run = await runSync({ trigger, platform });
+      console.log(`[${trigger}/${platform}] ${run.status}: ${run.courses} 场 / ${run.attendance} 条`);
+    } catch (error) { console.error(`[${trigger}/${platform}]`, error.message); }
+  }
   const settings = loadStore().settings;
   if (settings.autoClassEnabled && settings.autoClassId) {
     try {
