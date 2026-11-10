@@ -1,0 +1,84 @@
+/* ===== 学员端活动页（游戏活动页风格） ===== */
+.campaigns-page .campaign-hero{position:relative;border-radius:16px;overflow:hidden;background:#1b1210;cursor:pointer;box-shadow:0 18px 42px rgba(80,20,20,.18);border:1px solid #2a1a18}
+.campaign-banner{position:relative;padding-top:56.25%;overflow:hidden;background:linear-gradient(135deg,#7f1c23,#391316)}
+.campaign-banner.tall{padding-top:0;height:330px}
+.campaign-banner img{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
+.campaign-banner-fallback{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5)}
+.campaign-banner-fallback svg{width:52px;height:52px}
+.campaign-banner-mask{position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(180deg,rgba(12,6,6,0) 35%,rgba(12,6,6,.86) 100%)}
+.campaign-banner-text{position:absolute;left:26px;right:26px;bottom:22px;z-index:2}
+.campaign-banner-text h3{margin:10px 0 6px;color:#fff;font-size:24px;font-family:'Noto Serif SC',serif;letter-spacing:1px;text-shadow:0 2px 12px rgba(0,0,0,.4)}
+.campaign-banner-text p{margin:0;color:rgba(255,255,255,.78);font-size:13px}
+
+.campaign-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.5px;background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.28)}
+.campaign-badge.live{background:linear-gradient(135deg,#d13b32,#98262c);border-color:rgba(255,255,255,.28)}
+.campaign-badge.soon{background:rgba(214,168,90,.9);color:#3a2410;border-color:rgba(255,255,255,.3)}
+.campaign-badge.end,.campaign-badge.off{background:rgba(90,84,80,.85);color:#e6ded6}
+
+.campaign-hero-foot{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 22px;background:linear-gradient(180deg,#231615,#1a100f)}
+.campaign-hero-foot strong{display:block;color:#fff;font-size:15px}
+.campaign-hero-foot span{display:block;margin-top:4px;color:rgba(255,255,255,.55);font-size:12px}
+.campaign-hero-right{display:flex;align-items:center;gap:14px;flex:none}
+.campaign-hero-right em{display:inline-flex;align-items:center;gap:6px;font-style:normal;color:#f0c886;font-size:12px}
+.campaign-hero-right em svg{width:15px;height:15px}
+
+.campaign-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.campaign-card{border-radius:14px;overflow:hidden;background:#1b1210;cursor:pointer;border:1px solid #2a1a18;transition:transform .18s,box-shadow .18s}
+.campaign-card:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(80,20,20,.2)}
+.campaign-card-foot{padding:12px 16px 15px;background:linear-gradient(180deg,#231615,#1a100f)}
+.campaign-card-foot strong{display:block;color:#fff;font-size:14px}
+.campaign-card-foot span{display:block;margin-top:4px;color:rgba(255,255,255,.5);font-size:11px}
+
+/* 详情弹层 */
+.campaign-detail-mask{position:fixed;top:0;right:0;bottom:0;left:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(16,8,8,.66);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.campaign-detail{position:relative;width:min(760px,100%);max-height:88vh;overflow:auto;border-radius:18px;background:#1b1210;border:1px solid #33211f;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.campaign-detail-close{position:absolute;right:14px;top:14px;z-index:3;width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(0,0,0,.45);color:#fff}
+.campaign-detail-close svg{width:16px;height:16px}
+.campaign-detail-body{padding:20px 24px 26px}
+.campaign-detail-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.campaign-detail-meta em{display:inline-flex;align-items:center;gap:6px;font-style:normal;color:#f0c886;font-size:12px}
+.campaign-detail-meta em svg{width:15px;height:15px}
+.campaign-detail-meta time{font-size:12px;color:rgba(255,255,255,.45)}
+.campaign-detail-body p{margin:0;color:rgba(255,255,255,.82);font-size:14px;line-height:1.95;white-space:pre-wrap}
+.campaign-cta{margin-top:20px;width:auto;min-height:42px;padding:0 24px}
+
+/* ===== 管理端 ===== */
+.campaign-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.campaign-admin-card{display:flex;gap:0;overflow:hidden}
+.campaign-admin-thumb{position:relative;flex:0 0 190px;background:linear-gradient(135deg,#7f1c23,#391316);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5)}
+.campaign-admin-thumb img{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover}
+.campaign-admin-thumb svg{width:34px;height:34px}
+.campaign-admin-body{flex:1;min-width:0;padding:14px 16px}
+.campaign-admin-head{display:flex;align-items:center;gap:10px}
+.campaign-admin-head strong{font-size:14px;color:#2f2a26;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.campaign-admin-body p{margin:6px 0 4px;font-size:12px;color:#8c857d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.campaign-admin-body small{font-size:11px;color:#aaa198}
+.campaign-admin-actions{display:flex;gap:8px;margin-top:12px}
+.campaign-admin-actions .btn{width:auto;height:32px;min-height:32px;padding:0 12px;font-size:12px}
+.campaign-admin-body .campaign-badge{background:#f6efe6;color:#8a6a44;border-color:#eee1cf}
+.campaign-admin-body .campaign-badge.live{background:#fbeceb;color:#9d2a30;border-color:#f3d5d3}
+.campaign-admin-body .campaign-badge.soon{background:#fdf3e2;color:#a4762d;border-color:#f0e1c8}
+.campaign-admin-body .campaign-badge.end,.campaign-admin-body .campaign-badge.off{background:#f2efec;color:#8c837a;border-color:#e6e0d9}
+
+/* 编辑弹窗 */
+.campaign-editor{width:620px;text-align:left;max-height:90vh;overflow:auto}
+.campaign-editor h2{margin-bottom:16px}
+.campaign-editor label{display:block;margin-top:12px;font-size:11px;color:#6b6058}
+.campaign-editor input,.campaign-editor textarea,.campaign-editor select{display:block;width:100%;margin-top:6px;padding:9px 11px;border:1px solid #ded6cc;border-radius:8px;background:#fcfbf9;font-size:13px;outline:none}
+.campaign-editor textarea{resize:vertical}
+.campaign-time-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.campaign-upload{margin-top:14px}
+.campaign-upload>span{font-size:11px;color:#6b6058}
+.campaign-upload-box{position:relative;margin-top:6px;border:1px dashed #d8cfc3;border-radius:10px;overflow:hidden;background:#faf7f2;min-height:120px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.campaign-upload-box img{width:100%;display:block}
+.campaign-upload-box input{position:absolute;top:0;right:0;bottom:0;left:0;opacity:0;cursor:pointer}
+.campaign-upload-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:26px;color:#a3988c}
+.campaign-upload-empty svg{width:26px;height:26px}
+.campaign-upload-empty small{font-size:11px}
+.campaign-editor>.btn{margin-top:18px;width:100%}
+
+@media(max-width:900px){
+  .campaign-grid{grid-template-columns:1fr}
+  .campaign-admin-grid{grid-template-columns:1fr}
+  .campaign-banner.tall{height:220px}
+}

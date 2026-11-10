@@ -29,3 +29,10 @@
 .mail-bubble-close{position:absolute;right:-7px;top:-9px;width:20px!important;height:20px;border-radius:50%;background:#fff!important;border:1px solid #efdcb9!important;color:#a1825c!important;font-size:13px;line-height:1;justify-content:center}
 @keyframes mail-bubble-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:900px){.mail-bubble{left:16px;right:16px;max-width:none}}
+
+/* 气泡容器：活动提醒 + 邮箱提醒叠放 */
+.notify-bubbles{position:fixed;left:260px;bottom:30px;z-index:44;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.notify-bubbles .mail-bubble{position:relative;left:0;bottom:0}
+.mail-bubble.campaign{background:#fff4e8;border-color:#f3d9ae;color:#8a4b1b}
+.mail-bubble.campaign::after{background:#fff4e8;border-color:#f3d9ae}
+.mail-bubble.campaign svg{color:#d9762e}

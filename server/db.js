@@ -35,7 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_daily_date ON daily_points(date);
 CREATE INDEX IF NOT EXISTS idx_students_points ON students(total_points);
 `;
 
-export const kvKeys = ['version', 'createdAt', 'settings', 'scoring', 'scoringMeta', 'classes', 'syncRuns', 'auditLogs', 'rewards', 'rewardClaims', 'cosmeticSelections', 'welfareGrants', 'announcements', 'pointAdjustments', 'feedback', 'noticeReads', 'meta'];
+export const kvKeys = ['version', 'createdAt', 'settings', 'scoring', 'scoringMeta', 'classes', 'syncRuns', 'auditLogs', 'rewards', 'rewardClaims', 'cosmeticSelections', 'welfareGrants', 'announcements', 'pointAdjustments', 'feedback', 'noticeReads', 'campaigns', 'meta'];
 const bigFields = ['students', 'lives', 'attendance', 'dailyPoints'];
 
 const tableOf = field => field === 'dailyPoints' ? 'daily_points' : field;

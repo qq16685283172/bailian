@@ -286,6 +286,60 @@ export function registerBusinessRoutes(app, requireAdmin) {
     res.json(item);
   });
 
+  /** 活动：后台配置，学员端按时间范围展示 */
+  app.get('/api/campaigns/active', requireAuth, (req, res) => {
+    const now = new Date().toISOString();
+    const list = (loadStore().campaigns || [])
+      .filter(item => item.enabled !== false)
+      .filter(item => (!item.startAt || item.startAt <= now) && (!item.endAt || item.endAt >= now))
+      .sort((a, b) => String(b.startAt || b.createdAt || '').localeCompare(String(a.startAt || a.createdAt || '')));
+    res.json({ list });
+  });
+
+  app.get('/api/campaigns', requireAdmin, (req, res) => {
+    const list = [...(loadStore().campaigns || [])]
+      .sort((a, b) => String(b.startAt || b.createdAt || '').localeCompare(String(a.startAt || a.createdAt || '')));
+    res.json({ list });
+  });
+
+  app.post('/api/campaigns', requireAdmin, (req, res) => {
+    const store = loadStore();
+    store.campaigns = store.campaigns || [];
+    const title = text(req.body?.title, 60);
+    if (!title) return res.status(400).json({ message: '请填写活动名称' });
+    const incoming = typeof req.body?.image === 'string' && req.body.image.startsWith('data:image/') ? req.body.image : '';
+    const index = store.campaigns.findIndex(item => item.id === req.body?.id);
+    const previous = index >= 0 ? store.campaigns[index] : {};
+    const campaign = {
+      ...previous,
+      id: previous.id || id('cp'),
+      title,
+      subtitle: text(req.body?.subtitle, 80),
+      content: text(req.body?.content, 2000),
+      image: incoming || previous.image || '',
+      startAt: text(req.body?.startAt, 30),
+      endAt: text(req.body?.endAt, 30),
+      enabled: req.body?.enabled !== false,
+      ctaLabel: text(req.body?.ctaLabel, 20),
+      ctaTarget: text(req.body?.ctaTarget, 20),
+      updatedAt: new Date().toISOString(),
+      createdAt: previous.createdAt || new Date().toISOString(),
+    };
+    if (index >= 0) store.campaigns[index] = campaign; else store.campaigns.unshift(campaign);
+    saveStore(store);
+    res.json(campaign);
+  });
+
+  app.post('/api/campaigns/:id/toggle', requireAdmin, (req, res) => {
+    const store = loadStore();
+    const item = (store.campaigns || []).find(entry => entry.id === req.params.id);
+    if (!item) return res.status(404).json({ message: '活动不存在' });
+    item.enabled = !item.enabled;
+    item.updatedAt = new Date().toISOString();
+    saveStore(store);
+    res.json(item);
+  });
+
   /** 邮箱：公告即站内信，按账号记录已读与领取状态 */
   app.get('/api/mailbox', requireAuth, (req, res) => {
     const store = loadStore();
