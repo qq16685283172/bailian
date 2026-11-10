@@ -286,6 +286,49 @@ export function registerBusinessRoutes(app, requireAdmin) {
     res.json(item);
   });
 
+  /** 邮箱：公告即站内信，按账号记录已读与领取状态 */
+  app.get('/api/mailbox', requireAuth, (req, res) => {
+    const store = loadStore();
+    const jwcode = req.auth.user.jwcode;
+    const reads = (store.noticeReads && store.noticeReads[jwcode]) || {};
+    const list = (store.announcements || [])
+      .filter(item => item.enabled)
+      .sort((a, b) => String(b.publishedAt).localeCompare(String(a.publishedAt)))
+      .map(item => ({
+        ...item,
+        read: Boolean(reads[item.id]),
+        claimed: Boolean(store.pointAdjustments && store.pointAdjustments[`notice-${item.id}-${jwcode}`]),
+      }));
+    res.json({ list, unread: list.filter(item => !item.read).length });
+  });
+
+  app.post('/api/mailbox/:id/read', requireAuth, (req, res) => {
+    const store = loadStore();
+    const jwcode = req.auth.user.jwcode;
+    const notice = (store.announcements || []).find(item => item.id === req.params.id);
+    if (!notice) return res.status(404).json({ message: '消息不存在' });
+    store.noticeReads = store.noticeReads || {};
+    store.noticeReads[jwcode] = store.noticeReads[jwcode] || {};
+    if (!store.noticeReads[jwcode][notice.id]) {
+      store.noticeReads[jwcode][notice.id] = new Date().toISOString();
+      saveStore(store);
+    }
+    res.json({ ok: true });
+  });
+
+  app.post('/api/mailbox/read-all', requireAuth, (req, res) => {
+    const store = loadStore();
+    const jwcode = req.auth.user.jwcode;
+    store.noticeReads = store.noticeReads || {};
+    store.noticeReads[jwcode] = store.noticeReads[jwcode] || {};
+    const now = new Date().toISOString();
+    for (const item of store.announcements || []) {
+      if (item.enabled && !store.noticeReads[jwcode][item.id]) store.noticeReads[jwcode][item.id] = now;
+    }
+    saveStore(store);
+    res.json({ ok: true });
+  });
+
   app.get('/api/announcements/active', (req, res) => {
     const list = (loadStore().announcements || []).filter(item => item.enabled).sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
     res.json({ list });
