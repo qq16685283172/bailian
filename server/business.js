@@ -7,6 +7,7 @@ import { getBehaviorAnalytics, getDashboard, getOperationsAnalytics, getStudents
 import { buildStudentWorkbook } from './export.js';
 import { shanghaiDate } from './client.js';
 import { rebuildDailyPoints } from './scoring.js';
+import { requireAuth } from './auth.js';
 import { loadStore, saveStore } from './store.js';
 
 const id = prefix => `${prefix}-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`;
@@ -213,6 +214,76 @@ export function registerBusinessRoutes(app, requireAdmin) {
     store.cosmeticSelections[jwcode] = selection;
     saveStore(store);
     res.json({ ok: true, selection });
+  });
+
+  /** 公告动作领取：每个账号每个公告只能领一次，直接落一条人工调整，不重算全量 */
+  app.post('/api/announcements/:id/claim', requireAuth, (req, res) => {
+    const store = loadStore();
+    const notice = (store.announcements || []).find(item => item.id === req.params.id);
+    if (!notice) return res.status(404).json({ message: '公告不存在' });
+    const action = (notice.actions || []).find(item => item.type === 'claim');
+    if (!action) return res.status(400).json({ message: '这条公告没有可领取的内容' });
+    const points = Number(action.points || 0);
+    if (!(points > 0)) return res.status(400).json({ message: '领取内容无效' });
+
+    const jwcode = req.auth.user.jwcode;
+    const key = `notice-${notice.id}-${jwcode}`;
+    store.pointAdjustments = store.pointAdjustments || {};
+    if (store.pointAdjustments[key]) return res.status(409).json({ message: '这份补偿你已经领取过了' });
+
+    const now = new Date().toISOString();
+    const date = shanghaiDate();
+    store.pointAdjustments[key] = {
+      id: key, jwcode, studentName: req.auth.user.name, points,
+      reason: notice.title, source: 'announcement', status: 'approved',
+      effectiveDate: date, requestedBy: 'system', requestedByName: '系统补偿',
+      createdAt: now, reviewedAt: now, reviewedBy: 'system', reviewedByName: '系统自动通过',
+    };
+    const dailyKey = `${jwcode}|${date}|${key}|manual`;
+    store.dailyPoints[dailyKey] = {
+      key: dailyKey, jwcode, name: req.auth.user.name, date,
+      channel: '版本补偿', ruleType: 'manual', ruleId: key,
+      watch: false, comment: false, gift: false, baseScore: 0, bonusScore: 0, multiplier: 1,
+      score: points, reason: notice.title, sources: { watch: [], comment: [], gift: [] }, updatedAt: now,
+    };
+    if (!store.students[jwcode]) store.students[jwcode] = { jwcode, name: req.auth.user.name, totalPoints: 0 };
+    store.students[jwcode].totalPoints = Math.round(((Number(store.students[jwcode].totalPoints) || 0) + points) * 100) / 100;
+    saveStore(store);
+    res.json({ ok: true, points, totalPoints: store.students[jwcode].totalPoints });
+  });
+
+  /** 反馈墙：只收弘历软件优化改进建议，所有人可见，管理员标记是否解决 */
+  app.get('/api/feedback', requireAuth, (req, res) => {
+    const list = [...(loadStore().feedback || [])]
+      .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+      .map(item => ({ ...item, mine: item.jwcode === req.auth.user.jwcode }));
+    res.json({ list });
+  });
+
+  app.post('/api/feedback', requireAuth, (req, res) => {
+    const content = text(req.body?.content, 500);
+    if (!content || content.length < 5) return res.status(400).json({ message: '请至少写 5 个字，说明希望改进的地方' });
+    const store = loadStore();
+    store.feedback = store.feedback || [];
+    const item = {
+      id: id('fb'), jwcode: req.auth.user.jwcode, name: req.auth.user.name,
+      content, status: 'open', createdAt: new Date().toISOString(),
+    };
+    store.feedback.unshift(item);
+    saveStore(store);
+    res.json(item);
+  });
+
+  app.post('/api/feedback/:id/resolve', requireAdmin, (req, res) => {
+    const store = loadStore();
+    const item = (store.feedback || []).find(entry => entry.id === req.params.id);
+    if (!item) return res.status(404).json({ message: '反馈不存在' });
+    item.status = 'resolved';
+    item.reply = text(req.body?.reply, 300) || '';
+    item.resolvedAt = new Date().toISOString();
+    item.resolvedBy = req.auth.user.name;
+    saveStore(store);
+    res.json(item);
   });
 
   app.get('/api/announcements/active', (req, res) => {

@@ -1,0 +1,25 @@
+.feedback-page .feedback-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 24px}
+.feedback-intro h2{margin:0 0 8px;font-size:18px}
+.feedback-intro p{margin:0;font-size:13px;line-height:1.9;color:#7c736a}
+.feedback-count{flex:none;font-size:12px;color:#a3988c;background:#faf6f0;border:1px solid #efe6da;border-radius:999px;padding:4px 12px}
+.feedback-form{padding:18px 22px}
+.feedback-form textarea{width:100%;min-height:92px;padding:12px 14px;border:1px solid #e2dcd4;border-radius:10px;background:#fcfbf9;font-size:14px;line-height:1.8;resize:vertical;outline:none}
+.feedback-form textarea:focus{border-color:#c9a577;box-shadow:0 0 0 3px rgba(190,140,80,.12)}
+.feedback-form-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.feedback-form-foot span{font-size:11px;color:#a89f96}
+.feedback-form-foot .btn{display:inline-flex;align-items:center;gap:6px;width:auto}
+.feedback-form-foot .btn svg{width:15px;height:15px}
+.feedback-list{display:flex;flex-direction:column;gap:12px}
+.feedback-item{padding:16px 20px}
+.feedback-item header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.feedback-item header strong{font-size:13px;color:#3c3732}
+.feedback-item header em{font-style:normal;font-size:10px;color:#9d2a30;background:#fbeceb;border-radius:4px;padding:1px 6px}
+.feedback-item header time{margin-left:auto;font-size:11px;color:#aaa198}
+.feedback-item p{margin:0;font-size:14px;line-height:1.85;color:#5f574f;white-space:pre-wrap;word-break:break-word}
+.feedback-item.resolved{background:#fcfdfb;border-color:#e4ecdf}
+.feedback-reply{display:flex;align-items:center;gap:7px;margin-top:10px;padding:9px 12px;border-radius:8px;background:#f2f7ef;color:#5d7a52;font-size:12px}
+.feedback-reply svg{width:15px;height:15px;flex:none}
+.feedback-resolve{display:flex;gap:8px;margin-top:12px}
+.feedback-resolve input{flex:1;min-width:0;height:36px;padding:0 12px;border:1px solid #e2dcd4;border-radius:8px;font-size:12px;outline:none}
+.feedback-resolve .btn{width:auto;height:36px}
+.feedback-resolve-btn{margin-top:12px;width:auto;height:34px}

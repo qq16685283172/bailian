@@ -3,10 +3,10 @@ import { BellRing, CheckCircle2, Megaphone, Pencil, Plus, X } from 'lucide-react
 import { DataState, formatTime, useRemote } from './real-data';
 import './announcements.css';
 
-export function AnnouncementModal({ items, onClose }) {
+export function AnnouncementModal({ items, onClose, onAction }) {
   return <div className="announcement-backdrop"><section className="announcement-modal" role="dialog" aria-modal="true" aria-label="百炼计划公告">
     <header className="announcement-head"><div className="announcement-bell"><BellRing /><i /></div><div><span>百炼公告 · 新通知</span><h2>有一份重要消息请查收</h2></div><button onClick={onClose} aria-label="关闭公告"><X /></button></header>
-    <div className="announcement-list">{items.map((item, index) => <article className="announcement-article" key={item.id}><div className="announcement-meta"><span>{item.important ? '重要通知' : '计划通知'}</span><time>{formatTime(item.publishedAt)}</time></div><h3>{item.title}</h3><p>{item.content}</p>{index < items.length - 1 && <hr />}</article>)}</div>
+    <div className="announcement-list">{items.map((item, index) => <article className="announcement-article" key={item.id}><div className="announcement-meta"><span>{item.important ? '重要通知' : '计划通知'}</span><time>{formatTime(item.publishedAt)}</time></div><h3>{item.title}</h3><p>{item.content}</p>{item.actions?.length > 0 && <div className="announcement-actions">{item.actions.map(action => <button key={action.label} className="btn btn-primary" onClick={() => onAction && onAction({ ...action, noticeId: item.id })}>{action.label}</button>)}</div>}{index < items.length - 1 && <hr />}</article>)}</div>
     <footer className="announcement-foot"><span><CheckCircle2 />阅读后本次登录不再自动提醒</span><button className="btn btn-primary" onClick={onClose}>我知道了</button></footer>
   </section></div>;
 }

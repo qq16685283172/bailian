@@ -8,6 +8,7 @@ import { AdminDashboard, AuditPage, RewardsAdmin, StudentsPage } from './RealAdm
 import RewardsPage from './Rewards';
 import Wardrobe from './Wardrobe';
 import { AnnouncementModal, AnnouncementsAdmin } from './Announcements';
+import FeedbackWall from './FeedbackWall';
 import BailianAi from './BailianAi';
 import HeroCanvas from './HeroCanvas';
 import AnimatedNumber from './AnimatedNumber';
@@ -16,17 +17,17 @@ import './client-live.css';
 
 const clientNav = [
   { id: 'home', label: '首页', icon: Home }, { id: 'tasks', label: '任务中心', icon: ListChecks },
-  { id: 'ranking', label: '排行榜', icon: Trophy }, { id: 'rewards', label: '奖励中心', icon: Gift }, { id: 'wardrobe', label: '我的装扮', icon: Shirt }, { id: 'profile', label: '我的', icon: UserRound },
+  { id: 'ranking', label: '排行榜', icon: Trophy }, { id: 'rewards', label: '奖励中心', icon: Gift }, { id: 'wardrobe', label: '我的装扮', icon: Shirt }, { id: 'feedback', label: '反馈墙', icon: MessageSquare }, { id: 'profile', label: '我的', icon: UserRound },
 ];
 const adminNav = [
   { id: 'dashboard', label: '数据总览', icon: LayoutDashboard }, { id: 'sync', label: '数据同步', icon: RefreshCw },
   { id: 'behavior', label: '行为分析', icon: Activity }, { id: 'operations', label: '运营分析', icon: Activity },
   { id: 'students', label: '学员管理', icon: Users }, { id: 'rewardsAdmin', label: '奖励管理', icon: Gift },
-  { id: 'announcements', label: '公告管理', icon: Megaphone }, { id: 'audit', label: '积分审核', icon: ShieldCheck }, { id: 'rules', label: '规则配置', icon: Settings },
+  { id: 'announcements', label: '公告管理', icon: Megaphone }, { id: 'feedbackAdmin', label: '反馈管理', icon: MessageSquare }, { id: 'audit', label: '积分审核', icon: ShieldCheck }, { id: 'rules', label: '规则配置', icon: Settings },
 ];
 const pageNames = {
-  home: ['学员首页', '每天进步一点，终会百炼成钢'], tasks: ['任务中心', '看清今日进度，不漏掉每一分'], ranking: ['排行榜', '每一份坚持，都值得被看见'], rewards: ['奖励中心', '成长有收获，坚持有回响'], wardrobe: ['我的装扮', '自由穿戴头像框、排名气泡和界面主题'], profile: ['个人中心', '我的学习档案与成长记录'],
-  dashboard: ['数据总览', '指标来自同步与积分记录'], sync: ['听课数据同步', '定时补采、增量去重、自动计分，全过程可追溯'], behavior: ['学员行为分析', '从学习行为中识别参与情况'], operations: ['运营分析', '从数据观察计划运行情况'], students: ['学员管理', '管理学员档案与积分'], rewardsAdmin: ['奖励管理', '配置奖励、库存与领取记录'], announcements: ['公告管理', '发布、编辑和停用学员端通知'], audit: ['积分审核', '每一次调整都有依据、有留痕'], rules: ['规则配置', '统一积分规则，公开透明可追溯'],
+  home: ['学员首页', '每天进步一点，终会百炼成钢'], tasks: ['任务中心', '看清今日进度，不漏掉每一分'], ranking: ['排行榜', '每一份坚持，都值得被看见'], rewards: ['奖励中心', '成长有收获，坚持有回响'], wardrobe: ['我的装扮', '自由穿戴头像框、排名气泡和界面主题'], profile: ['个人中心', '我的学习档案与成长记录'], feedback: ['反馈墙', '只收弘历软件优化改进建议，经频道商讨后决定是否修改'],
+  dashboard: ['数据总览', '指标来自同步与积分记录'], sync: ['听课数据同步', '定时补采、增量去重、自动计分，全过程可追溯'], behavior: ['学员行为分析', '从学习行为中识别参与情况'], operations: ['运营分析', '从数据观察计划运行情况'], students: ['学员管理', '管理学员档案与积分'], rewardsAdmin: ['奖励管理', '配置奖励、库存与领取记录'], announcements: ['公告管理', '发布、编辑和停用学员端通知'], feedbackAdmin: ['反馈管理', '标记反馈是否已解决'], audit: ['积分审核', '每一次调整都有依据、有留痕'], rules: ['规则配置', '统一积分规则，公开透明可追溯'],
 };
 
 function Brand({ admin }) {
@@ -120,6 +121,23 @@ export default function App() {
   const currentDate = new Date();
   const closeAnnouncement = () => { if(modal?.noticeKey)sessionStorage.setItem(modal.noticeKey,modal.latestId);setModal(null); };
   const openAnnouncements = async () => { try{const response=await fetch('/api/announcements/active');const result=await response.json();if(result.list?.length)setModal({type:'announcement',items:result.list,noticeKey:`bailian-notice-${auth.jwcode}`,latestId:result.list[0].id});else notify('暂时没有新公告');}catch{notify('公告读取失败，请稍后再试');} };
+  // 公告里的动作按钮：跳转页面 / 打开小AI / 领取补偿
+  const handleNoticeAction = async action => {
+    if(!action)return;
+    if(action.type==='page'){ closeAnnouncement(); go(action.target); return; }
+    if(action.type==='feedback'){ closeAnnouncement(); go('feedback'); return; }
+    if(action.type==='ai'){ closeAnnouncement(); window.dispatchEvent(new CustomEvent('bailian:open-ai')); return; }
+    if(action.type==='claim'){
+      try{
+        const response=await fetch(`/api/announcements/${action.noticeId}/claim`,{method:'POST'});
+        const result=await response.json();
+        if(!response.ok){ notify(result.message||'领取失败'); return; }
+        notify(`领取成功，+ ${result.points} 分`);
+        refreshClient();
+        closeAnnouncement();
+      }catch{ notify('领取失败，请稍后再试'); }
+    }
+  };
 
   useEffect(()=>{
     let active=true;
@@ -158,6 +176,7 @@ export default function App() {
     else if(page==='ranking')content=<RankingPage canExport={auth.role==='admin'} cosmetics={clientData.cosmetics}/>;
     else if(page==='rewards')content=<RewardsPage notify={notify} onChanged={refreshClient}/>;
     else if(page==='wardrobe')content=<Wardrobe clientData={clientData} notify={notify} onChanged={refreshClient} go={go}/>;
+    else if(page==='feedback')content=<FeedbackWall notify={notify}/>;
     else content=<ProfilePage go={go} clientData={clientData} onLogout={logout} onAppeal={()=>setModal({type:'appeal'})}/>;
   }else{
     if(page==='dashboard')content=<AdminDashboard go={go}/>;
@@ -167,9 +186,10 @@ export default function App() {
     else if(page==='students')content=<StudentsPage onAdjust={student=>setModal({type:'adjust',student})}/>;
     else if(page==='rewardsAdmin')content=<RewardsAdmin notify={notify}/>;
     else if(page==='announcements')content=<AnnouncementsAdmin notify={notify}/>;
+    else if(page==='feedbackAdmin')content=<FeedbackWall notify={notify} admin/>;
     else if(page==='audit')content=<AuditPage notify={notify}/>;
     else content=<ScoringRules notify={notify}/>;
   }
 
-  return <div className={`app ${mode} ${mode==='client'?(clientData?.cosmetics?.theme||''):''}`}>{mobileMenu&&<div className="sidebar-mask" onClick={()=>setMobileMenu(false)}/>}<aside className={`sidebar ${mobileMenu?'mobile-open':''}`}><Brand admin={mode==='admin'}/><div className="side-section-label">{mode==='client'?'学习成长':'工作台'}</div><nav>{nav.map(item=><button key={item.id} className={page===item.id?'active':''} onClick={()=>go(item.id)}><item.icon/>{mode==='client'&&item.id==='rewards'&&clientData?.pendingRewards>0&&<i className="nav-dot"/>}<span>{item.label}</span></button>)}</nav><div className="side-bottom">{auth.role==='admin'&&<button onClick={switchMode}><RefreshCw/><span>{mode==='client'?'进入管理端':'返回学员端'}</span></button>}{mode==='admin'&&<button onClick={()=>setModal({type:'password'})}><LockKeyhole/><span>修改密码</span></button>}<button onClick={logout}><LogOut/><span>退出登录</span></button><div className="side-user"><div>{(clientData?.student.name||auth.name)[0]}</div><span><strong>{clientData?.student.name||auth.name}</strong><small>{mode==='client'?`精网号 ${jwcode}`:`管理员 · ${auth.jwcode}`}</small></span></div></div></aside><main className="main"><header className="topbar"><button className="mobile-menu-btn" onClick={()=>setMobileMenu(true)}><Menu/></button><div><h1>{title}</h1><p>{subtitle}</p></div><div className="top-actions"><button className="notification-btn" onClick={()=>mode==='admin'?go('announcements'):openAnnouncements()}><Bell/></button><div className="top-date"><CalendarDays/><span>{currentDate.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'})}<small>{currentDate.toLocaleDateString('zh-CN',{weekday:'long'})}</small></span></div>{auth.role==='admin'&&<button className={`btn btn-${mode==='client'?'outline':'soft'}`} onClick={switchMode}><RefreshCw/>{mode==='client'?'管理端':'学员端'}</button>}</div></header><div className="content">{content}</div><footer className="footer"><span>百炼计划 · 让每一次学习都有成长</span></footer></main>{mode==='client'&&<nav className="mobile-bottom-nav">{clientNav.map(item=><button key={item.id} className={page===item.id?'active':''} onClick={()=>go(item.id)}><item.icon/>{item.id==='rewards'&&clientData?.pendingRewards>0&&<i className="nav-dot"/>}<span>{item.label==='任务中心'?'任务':item.label==='奖励中心'?'奖励':item.label==='排行榜'?'排行':item.label==='我的装扮'?'装扮':item.label}</span></button>)}</nav>}{mode==='client'&&<BailianAi userName={clientData?.student.name||auth.name} pendingRewards={clientData?.pendingRewards||0}/>}{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}{modal?.type==='password'&&<PasswordModal onClose={()=>setModal(null)} onSaved={message=>{setModal(null);setAuth(previous=>previous?{...previous,defaultPassword:false}:previous);notify(message)}}/>}{modal?.type==='adjust'&&<AdjustModal student={modal.student} onClose={()=>setModal(null)} onSaved={item=>{setModal(null);notify(`调整申请 ${item.id} 已保存，等待审核`)}}/>}{modal?.type==='appeal'&&<AppealModal onClose={()=>setModal(null)} onSaved={item=>{setModal(null);notify(`申诉 ${item.id} 已提交，等待管理员审核`)}}/>}{modal?.type==='announcement'&&<AnnouncementModal items={modal.items} onClose={closeAnnouncement}/>}</div>;
+  return <div className={`app ${mode} ${mode==='client'?(clientData?.cosmetics?.theme||''):''}`}>{mobileMenu&&<div className="sidebar-mask" onClick={()=>setMobileMenu(false)}/>}<aside className={`sidebar ${mobileMenu?'mobile-open':''}`}><Brand admin={mode==='admin'}/><div className="side-section-label">{mode==='client'?'学习成长':'工作台'}</div><nav>{nav.map(item=><button key={item.id} className={page===item.id?'active':''} onClick={()=>go(item.id)}><item.icon/>{mode==='client'&&item.id==='rewards'&&clientData?.pendingRewards>0&&<i className="nav-dot"/>}<span>{item.label}</span></button>)}</nav><div className="side-bottom">{auth.role==='admin'&&<button onClick={switchMode}><RefreshCw/><span>{mode==='client'?'进入管理端':'返回学员端'}</span></button>}{mode==='admin'&&<button onClick={()=>setModal({type:'password'})}><LockKeyhole/><span>修改密码</span></button>}<button onClick={logout}><LogOut/><span>退出登录</span></button><div className="side-user"><div>{(clientData?.student.name||auth.name)[0]}</div><span><strong>{clientData?.student.name||auth.name}</strong><small>{mode==='client'?`精网号 ${jwcode}`:`管理员 · ${auth.jwcode}`}</small></span></div></div></aside><main className="main"><header className="topbar"><button className="mobile-menu-btn" onClick={()=>setMobileMenu(true)}><Menu/></button><div><h1>{title}</h1><p>{subtitle}</p></div><div className="top-actions"><button className="notification-btn" onClick={()=>mode==='admin'?go('announcements'):openAnnouncements()}><Bell/></button><div className="top-date"><CalendarDays/><span>{currentDate.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'})}<small>{currentDate.toLocaleDateString('zh-CN',{weekday:'long'})}</small></span></div>{auth.role==='admin'&&<button className={`btn btn-${mode==='client'?'outline':'soft'}`} onClick={switchMode}><RefreshCw/>{mode==='client'?'管理端':'学员端'}</button>}</div></header><div className="content">{content}</div><footer className="footer"><span>百炼计划 · 让每一次学习都有成长</span></footer></main>{mode==='client'&&<nav className="mobile-bottom-nav">{clientNav.map(item=><button key={item.id} className={page===item.id?'active':''} onClick={()=>go(item.id)}><item.icon/>{item.id==='rewards'&&clientData?.pendingRewards>0&&<i className="nav-dot"/>}<span>{item.label==='任务中心'?'任务':item.label==='奖励中心'?'奖励':item.label==='排行榜'?'排行':item.label==='我的装扮'?'装扮':item.label}</span></button>)}</nav>}{mode==='client'&&<BailianAi userName={clientData?.student.name||auth.name} pendingRewards={clientData?.pendingRewards||0}/>}{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}{modal?.type==='password'&&<PasswordModal onClose={()=>setModal(null)} onSaved={message=>{setModal(null);setAuth(previous=>previous?{...previous,defaultPassword:false}:previous);notify(message)}}/>}{modal?.type==='adjust'&&<AdjustModal student={modal.student} onClose={()=>setModal(null)} onSaved={item=>{setModal(null);notify(`调整申请 ${item.id} 已保存，等待审核`)}}/>}{modal?.type==='appeal'&&<AppealModal onClose={()=>setModal(null)} onSaved={item=>{setModal(null);notify(`申诉 ${item.id} 已提交，等待管理员审核`)}}/>}{modal?.type==='announcement'&&<AnnouncementModal items={modal.items} onClose={closeAnnouncement} onAction={handleNoticeAction}/>}</div>;
 }

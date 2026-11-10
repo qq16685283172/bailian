@@ -52,3 +52,7 @@
   .announcement-admin-card{grid-template-columns:38px 1fr;padding:16px}
   .announcement-admin-actions{grid-column:1/-1;flex-wrap:wrap}
 }
+
+/* 公告动作按钮 */
+.announcement-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.announcement-actions .btn{width:auto;min-height:38px;padding:0 18px;font-size:13px}

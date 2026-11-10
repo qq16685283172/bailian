@@ -16,6 +16,13 @@ export default function BailianAi({ userName, pendingRewards = 0 }) {
   const [tipIndex, setTipIndex] = useState(-1);
   const scrollRef = useRef(null);
 
+  // 公告里的「试试小AI」按钮通过自定义事件打开面板
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener('bailian:open-ai', handler);
+    return () => window.removeEventListener('bailian:open-ai', handler);
+  }, []);
+
   useEffect(() => {
     if (open) return undefined;
     const hideTimer = { current: null };
