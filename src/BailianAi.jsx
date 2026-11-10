@@ -3,7 +3,7 @@ import { Bot, Send, Sparkles, X } from 'lucide-react';
 import './bailian-ai.css';
 
 const opening = '你好，我是百炼小AI。可以查今日、本周、本月或指定日期积分，也能问连续学习、排名、双倍活动、头像框和排名气泡。';
-const defaultSuggestions = ['我有多少积分', '本周和本月各得多少分', '我有哪些双倍积分', '连续学习多少天了', '财经壹眼得了多少分', '有什么装扮可以领'];
+const defaultSuggestions = ['我有多少积分', '本周和本月各得多少分', '离下一级还差多少分', '连续学习多少天了', '财经壹眼得了多少分', '数据什么时候更新'];
 const tipPhrases = ['又不会的就点击我', '积分、排名、翻倍都能问我', '今天学到哪了？我帮你算算', '有疑问，随时点我'];
 
 export default function BailianAi({ userName, pendingRewards = 0 }) {
@@ -46,14 +46,14 @@ export default function BailianAi({ userName, pendingRewards = 0 }) {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, sending, open]);
 
-  const ask = async question => {
+  const ask = async (question, intentId) => {
     const text = String(question ?? draft).trim();
     if (!text || sending) return;
     setMessages(list => [...list, { role: 'me', text }]);
     setDraft('');
     setSending(true);
     try {
-      const response = await fetch('/api/ai/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: text }) });
+      const response = await fetch('/api/ai/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(intentId ? { question: text, intent: intentId } : { question: text }) });
       let result = null;
       try { result = await response.json(); } catch { result = null; }
       const reply = response.status === 401
@@ -63,7 +63,7 @@ export default function BailianAi({ userName, pendingRewards = 0 }) {
           : response.ok
             ? result.answer
             : (result.message || '小AI 暂时无法回答，请稍后再试。');
-      setMessages(list => [...list, { role: 'ai', text: reply }]);
+      setMessages(list => [...list, { role: 'ai', text: reply, choices: result && Array.isArray(result.choices) ? result.choices : null }]);
     } catch {
       setMessages(list => [...list, { role: 'ai', text: '连不上服务，请确认网络连接后再问一次。' }]);
     } finally {
@@ -94,7 +94,12 @@ export default function BailianAi({ userName, pendingRewards = 0 }) {
     <div className="ai-body" ref={scrollRef} aria-live="polite">
       {messages.map((item, index) => <div className={`ai-message-row ${item.role}`} key={index}>
         {item.role === 'ai' && <div className="ai-msg-avatar"><Bot /></div>}
-        <div className={`ai-msg ${item.role}`}>{item.text}</div>
+        <div className={`ai-msg ${item.role}`}>
+          {item.text}
+          {item.role === 'ai' && item.choices && item.choices.length > 0 && <span className="ai-choices">
+            {item.choices.map(choice => <button key={choice.id} onClick={() => ask(choice.title, choice.id)}>{choice.title}</button>)}
+          </span>}
+        </div>
         {item.role === 'me' && <div className="ai-msg-avatar me">{String(userName || '我').slice(0, 1)}</div>}
       </div>)}
       {sending && <div className="ai-message-row ai"><div className="ai-msg-avatar"><Bot /></div><div className="ai-msg ai typing"><i /><i /><i /></div></div>}

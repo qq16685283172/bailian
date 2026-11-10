@@ -71,3 +71,8 @@
   .ai-tip{max-width:210px;padding:9px 12px;font-size:13px}
   .ai-tip::after{right:20px}
 }
+
+/* 小AI 候选意图按钮 */
+.ai-msg .ai-choices{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.ai-panel .ai-msg .ai-choices button{padding:7px 12px;border:1px solid #e7dac9;border-radius:999px;background:#fff;color:#805c35;font-size:13px;line-height:1.4}
+.ai-panel .ai-msg .ai-choices button:hover{border-color:#c6974d;background:#fffaf2}

@@ -1,4 +1,5 @@
 import { getClientSnapshot, shanghaiDate } from './client.js';
+import { intentById, matchIntents } from './ai-intents.js';
 
 const MAX_QUESTION = 200;
 const MAX_ANSWER = 800;
@@ -180,13 +181,34 @@ const handlers = {
       facts: { 今日积分: snapshot.todayScore, 累计总积分: snapshot.totalPoints },
     };
   },
+  sync({ snapshot }) {
+    const last = snapshot.lastSync ? String(snapshot.lastSync).slice(0, 16).replace('T', ' ') : null;
+    return {
+      text: last
+        ? `最近一次数据同步：${last}。服务每天 12:00 和 24:00 自动补采精网与投教，刚听完课的话，等下一轮同步后就能看到。`
+        : '还没有同步记录。服务每天 12:00 和 24:00 自动补采，请稍后再问我。',
+      facts: { 最近同步: last || '暂无' },
+    };
+  },
+  cosmetics({ snapshot }) {
+    const picked = [];
+    if (snapshot.cosmetics?.avatarFrame) picked.push('头像框');
+    if (snapshot.cosmetics?.rankBubble) picked.push('排名气泡');
+    if (snapshot.cosmetics?.theme) picked.push('主题');
+    return {
+      text: picked.length
+        ? `你正在使用：${picked.join('、')}。想换的话，去「我的装扮」里选择已解锁的样式就行。`
+        : '你还没有穿戴装扮。领取头像框、排名气泡或主题后，可以在「我的装扮」里启用。',
+      facts: { 已穿戴: picked },
+    };
+  },
 };
 
 function assetName(item) {
   return item.claimedAt ? `${item.name}（${String(item.claimedAt).slice(0, 10)} 已领）` : item.name;
 }
 
-function composeAnswer(store, jwcode, question) {
+function composeAnswer(store, jwcode, question, forcedIntent = null) {
   const blocked = blockedPatterns.find(item => item.pattern.test(question));
   if (blocked) return { answer: blocked.reason, blocked: true, intent: 'blocked', facts: {} };
 
@@ -201,25 +223,54 @@ function composeAnswer(store, jwcode, question) {
     return { answer: `你可以问我：今日、本周、本月或指定日期积分，连续学习天数，各栏目积分，等级与排名，任务进度，双倍活动，以及头像框和排名气泡。试试：${aiSuggestions.slice(0, 4).join('、')}。`, blocked: true, intent: 'help', facts: {} };
   }
 
-  const matched = topicMatchers.filter(item => item.pattern.test(question)).map(item => item.intent);
-  if (!matched.length || /天气|新闻|股票|基金|翻译|笑话|故事|菜谱|写代码|几点|星期几/.test(question)) {
+  const forced = forcedIntent
+    ? { id: forcedIntent.id, title: forcedIntent.title, handler: forcedIntent.handler, score: 1, example: forcedIntent.examples?.[0] }
+    : null;
+  const offTopic = /天气|新闻|股票|基金|翻译|笑话|故事|菜谱|写代码|几点|星期几|几号/.test(question);
+  const candidates = forced ? [forced] : (offTopic ? [] : matchIntents(question));
+
+  if (!candidates.length) {
     if (/^(你好|您好|hi|hello|在吗|嗨)/i.test(question)) {
       return { answer: `你好，我是百炼小AI。你可以问我：${aiSuggestions.join('、')}。`, blocked: false, intent: 'greeting', facts: {} };
     }
     return {
       answer: `这个问题超出我的范围了。我只负责查询你本人的学习积分、任务、等级、排名和奖励，可以试试：${aiSuggestions.slice(0, 4).join('、')}。`,
-      blocked: true, intent: 'unknown', facts: {},
+      blocked: true, intent: 'unknown', facts: {}, suggestions: aiSuggestions,
+    };
+  }
+
+  const top = candidates[0];
+  const confident = Boolean(forced) || top.score >= 0.66;
+
+  // 拿不准时把候选摆出来让用户挑，而不是硬猜
+  if (!confident && top.score >= 0.34) {
+    return {
+      answer: '我没完全听准，你是想问下面哪一个？点一下我就按那个回答。',
+      choices: candidates.slice(0, 3).map(item => ({ id: item.id, title: item.title, example: item.example })),
+      blocked: false, intent: 'clarify', facts: {},
+    };
+  }
+  if (!confident) {
+    return {
+      answer: `这个问题我拿不准。我比较擅长：${aiSuggestions.slice(0, 3).join('、')}，你可以换个说法再问。`,
+      blocked: true, intent: 'unknown', facts: {}, suggestions: aiSuggestions,
     };
   }
 
   const snapshot = getClientSnapshot(store, jwcode);
   if (!snapshot) return { answer: '还没有你的同步记录，请等同步任务补采完成后再问我。', blocked: true, intent: 'empty', facts: {} };
 
-  // 已有更具体意图时不再重复播报总积分
-  const detailed = matched.filter(intent => intent !== 'points');
-  const usable = detailed.length ? detailed : matched;
-  const order = ['today', 'period', 'history', 'multiplier', 'rewards', 'streak', 'channel', 'points', 'level', 'rank', 'ledger', 'task', 'rule', 'appeal'];
-  const picked = order.filter(intent => usable.includes(intent)).slice(0, 2);
+  // 取最高分意图，必要时带一个分数接近的
+  const order = ['today', 'period', 'history', 'multiplier', 'rewards', 'streak', 'channel', 'points', 'level', 'rank', 'ledger', 'task', 'rule', 'appeal', 'sync', 'cosmetics'];
+  const usable = candidates
+    .filter(item => item.score >= Math.max(0.45, top.score - 0.12))
+    .slice(0, 2)
+    .map(item => item.handler)
+    .filter(id => handlers[id]);
+  const picked = order.filter(intent => usable.includes(intent));
+  if (!picked.length) {
+    return { answer: '这个我暂时答不了，可以问我的积分、排名、任务或奖励。', blocked: true, intent: 'unknown', facts: {} };
+  }
   const ctx = { store, snapshot, jwcode, question };
   const parts = picked.map(intent => handlers[intent](ctx));
   const facts = Object.assign({}, ...parts.map(part => part.facts));
@@ -280,10 +331,10 @@ export function aiEngine() {
     : { engine: 'rules', model: null, fallback: 'rules' };
 }
 
-export async function askAI({ store, jwcode, question }) {
+export async function askAI({ store, jwcode, question, intent }) {
   const text = String(question || '').replace(/\s+/g, ' ').trim().slice(0, MAX_QUESTION);
   if (text.length < 2) return { answer: '请说得具体一点，比如「我现在的总积分是多少」。', intent: 'empty', blocked: true, engine: 'rules', suggestions: aiSuggestions };
-  const result = composeAnswer(store, jwcode, text);
+  const result = composeAnswer(store, jwcode, text, intent ? intentById(intent) : null);
   if (result.blocked) return { ...result, engine: 'rules', suggestions: aiSuggestions };
   const polished = await polishWithModel(text, result.answer, result.facts);
   return { ...result, answer: polished || result.answer, engine: polished ? 'model' : 'rules', suggestions: aiSuggestions };

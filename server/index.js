@@ -278,7 +278,7 @@ app.post('/api/ai/ask', async (req, res) => {
   const question = String(req.body?.question || '');
   if (question.length > 200) return res.status(400).json({ message: '问题请控制在 200 字以内' });
   try {
-    const result = await askAI({ store: loadStore(), jwcode: req.auth.user.jwcode, question });
+    const result = await askAI({ store: loadStore(), jwcode: req.auth.user.jwcode, question, intent: String(req.body?.intent || "") || null });
     res.json(result);
   } catch (error) {
     console.error('[ai]', error.message);
