@@ -9,6 +9,8 @@ export default function FeedbackWall({ notify, admin }) {
   const [sending, setSending] = useState(false);
   const [replyFor, setReplyFor] = useState('');
   const [replyText, setReplyText] = useState('');
+  const [commentFor, setCommentFor] = useState('');
+  const [commentText, setCommentText] = useState('');
 
   const submit = async event => {
     event.preventDefault();
@@ -36,6 +38,21 @@ export default function FeedbackWall({ notify, admin }) {
     setReplyText('');
     reload();
     notify && notify('已标记为已解决');
+  };
+
+  const addComment = async id => {
+    const content = commentText.trim();
+    if (content.length < 2) return notify && notify('评论至少 2 个字');
+    try {
+      const response = await fetch(`/api/feedback/${id}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || '评论失败');
+      setCommentFor('');
+      setCommentText('');
+      reload();
+    } catch (err) {
+      notify && notify(err.message);
+    }
   };
 
   return <div className="page-stack feedback-page">
@@ -71,6 +88,22 @@ export default function FeedbackWall({ notify, admin }) {
             <CheckCircle2 />
             <span>{item.reply || '经过商讨，相关问题已处理'}{item.resolvedBy ? ` · ${item.resolvedBy}` : ''}</span>
           </div>}
+          {item.comments?.length > 0 && <div className="feedback-comments">
+            {item.comments.map(comment => <div className="feedback-comment" key={comment.id}>
+              <div className="fc-head">
+                <span className="fc-name">{comment.name}{comment.role === 'admin' ? ' · 管理员' : ''}</span>
+                <time>{formatTime(comment.createdAt)}</time>
+              </div>
+              <p>{comment.content}</p>
+            </div>)}
+          </div>}
+          {commentFor === item.id
+            ? <div className="feedback-comment-form">
+                <input value={commentText} maxLength={300} placeholder="写下你的看法…" onChange={event => setCommentText(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') addComment(item.id); }} />
+                <button className="btn btn-outline" onClick={() => { setCommentFor(''); setCommentText(''); }}>取消</button>
+                <button className="btn btn-primary" onClick={() => addComment(item.id)}>发送</button>
+              </div>
+            : <button className="btn btn-outline feedback-comment-btn" onClick={() => { setCommentFor(item.id); setCommentText(''); }}>评论{item.comments?.length ? `（${item.comments.length}）` : ''}</button>}
           {admin && item.status !== 'resolved' && (replyFor === item.id
             ? <div className="feedback-resolve">
                 <input value={replyText} maxLength={300} placeholder="处理说明（可留空）" onChange={event => setReplyText(event.target.value)} />

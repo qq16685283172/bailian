@@ -274,6 +274,23 @@ export function registerBusinessRoutes(app, requireAdmin) {
     res.json(item);
   });
 
+  app.post('/api/feedback/:id/comments', requireAuth, (req, res) => {
+    const content = text(req.body?.content, 300);
+    if (!content || content.length < 2) return res.status(400).json({ message: '评论至少 2 个字' });
+    const store = loadStore();
+    const item = (store.feedback || []).find(entry => entry.id === req.params.id);
+    if (!item) return res.status(404).json({ message: '反馈不存在' });
+    item.comments = item.comments || [];
+    const comment = {
+      id: id('fc'), jwcode: req.auth.user.jwcode, name: req.auth.user.name,
+      content, createdAt: new Date().toISOString(),
+      role: req.auth.user.role || 'student',
+    };
+    item.comments.push(comment);
+    saveStore(store);
+    res.json(comment);
+  });
+
   app.post('/api/feedback/:id/resolve', requireAdmin, (req, res) => {
     const store = loadStore();
     const item = (store.feedback || []).find(entry => entry.id === req.params.id);

@@ -23,3 +23,15 @@
 .feedback-resolve input{flex:1;min-width:0;height:36px;padding:0 12px;border:1px solid #e2dcd4;border-radius:8px;font-size:12px;outline:none}
 .feedback-resolve .btn{width:auto;height:36px}
 .feedback-resolve-btn{margin-top:12px;width:auto;height:34px}
+
+/* 反馈评论 */
+.feedback-comments{margin-top:14px;border-top:1px dashed #efe8df;padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.feedback-comment{background:#faf8f5;border-radius:10px;padding:10px 13px}
+.fc-head{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.fc-name{font-size:12px;color:#6b5f52;font-weight:600}
+.fc-head time{font-size:10px;color:#b3aaa0;margin-left:auto}
+.feedback-comment p{margin:0;font-size:13px;line-height:1.8;color:#5f574f;white-space:pre-wrap;word-break:break-word}
+.feedback-comment-btn{margin-top:10px;width:auto;height:32px}
+.feedback-comment-form{display:flex;gap:8px;margin-top:10px}
+.feedback-comment-form input{flex:1;min-width:0;height:34px;padding:0 12px;border:1px solid #e2dcd4;border-radius:8px;font-size:12px;outline:none}
+.feedback-comment-form .btn{width:auto;height:34px}
